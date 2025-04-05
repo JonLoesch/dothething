@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { api, HydrateClient } from "~/trpc/server";
+import { TaskList } from "./_components/TaskList";
 
 export default async function Home() {
   const hello = await api.post.hello({ text: "from tRPC" });
@@ -41,6 +42,7 @@ export default async function Home() {
               {hello ? hello.greeting : "Loading tRPC query..."}
             </p>
           </div>
+          <TaskList />
         </div>
       </main>
     </HydrateClient>
