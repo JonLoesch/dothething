@@ -27,7 +27,7 @@ export const taskRouter = createTRPCRouter({
   remove: publicProcedure
     .input(
       z.object({
-        id: z.number(),
+        id: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
