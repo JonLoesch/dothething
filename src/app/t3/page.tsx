@@ -66,7 +66,7 @@ export default async function T3() {
 
           <TaskList />
 
-          <Link href={'/my'}>My Account</Link>
+          <Link href={'/my/list'}>My Account</Link>
         </div>
       </main>
     </HydrateClient>
