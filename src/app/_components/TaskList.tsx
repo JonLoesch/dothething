@@ -2,11 +2,23 @@
 
 import { useCallback, useState, type FC } from "react";
 import { api } from "~/trpc/react";
-import { Button, Checkbox, Label, TextInput } from "flowbite-react";
-import { Task } from "./Task";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionPanel,
+  AccordionTitle,
+  Button,
+  Label,
+  TextInput,
+} from "flowbite-react";
+import type { recurringTasks } from "~/server/db/schema";
 
-export const TaskList: FC = () => {
-  const all = api.task.schedule.useQuery();
+export const TaskList: FC<{
+  initialTasks: Array<typeof recurringTasks.$inferSelect>;
+}> = (props) => {
+  const all = api.task.all.useQuery(undefined, {
+    initialData: props.initialTasks,
+  });
   const add = api.task.add.useMutation();
   const [newTitle, setNewTitle] = useState("");
 
@@ -17,11 +29,18 @@ export const TaskList: FC = () => {
 
   return (
     <div className="flex max-w-md flex-col gap-4">
-      {all.isSuccess &&
-        all.data.map((x) => <Task {...x} key={x.id} onChange={all.refetch} />)}
+      {all.isSuccess && (
+        <Accordion>
+          {all.data.map((t) => (
+            <AccordionPanel key={t.id}>
+              <Task {...t} onChange={() => all.refetch()} />
+            </AccordionPanel>
+          ))}
+        </Accordion>
+      )}
       <div>
         <div className="mb-2 block">
-          <Label htmlFor="email1">New Task</Label>
+          <Label htmlFor="title">New Task</Label>
         </div>
         <TextInput
           id="title"
@@ -38,5 +57,27 @@ export const TaskList: FC = () => {
         Add New Task
       </Button>
     </div>
+  );
+};
+
+const Task: FC<
+  typeof recurringTasks.$inferSelect & {
+    onChange?: () => void;
+  }
+> = (props) => {
+  const remove = api.task.remove.useMutation();
+  const deleteThis = useCallback(() => {
+    void remove.mutateAsync({ id: props.id }).then(props.onChange);
+  }, [props.id, props.onChange, remove]);
+  return (
+    <>
+      <AccordionTitle>{props.title}</AccordionTitle>
+      <AccordionContent>
+        This is test content
+        <Button color="red" onClick={deleteThis}>
+          Delete
+        </Button>
+      </AccordionContent>
+    </>
   );
 };

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { LatestPost } from "~/app/_components/post";
 import { auth } from "~/server/auth";
 import { api, HydrateClient } from "~/trpc/server";
-import { TaskList } from "../_components/TaskList";
 
 export default async function T3() {
   const hello = await api.post.hello({ text: "from tRPC" });
@@ -63,8 +62,6 @@ export default async function T3() {
           </div>
 
           {session?.user && <LatestPost />}
-
-          <TaskList />
 
           <Link href={'/my/list'}>My Account</Link>
         </div>

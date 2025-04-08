@@ -4,7 +4,7 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { recurringTasks } from "~/server/db/schema";
 
 export const taskRouter = createTRPCRouter({
-  schedule: publicProcedure.query(async ({ ctx }) => {
+  all: publicProcedure.query(async ({ ctx }) => {
     return ctx.db.query.recurringTasks.findMany();
   }),
   add: publicProcedure

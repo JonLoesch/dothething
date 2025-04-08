@@ -26,6 +26,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import type Link from "next/link";
 import { type ReactNode } from "react";
 import NavLink from "../_components/NavLink";
+import { HydrateClient } from "~/trpc/server";
 
 const user = {
   name: "Tom Cook",
@@ -237,7 +238,7 @@ async function Layout(
             <main className="-mt-32">
               <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
                 <div className="rounded-lg bg-white px-5 py-6 shadow-sm sm:px-6">
-                  {props.children}
+                  <HydrateClient>{props.children}</HydrateClient>
                 </div>
               </div>
             </main>
