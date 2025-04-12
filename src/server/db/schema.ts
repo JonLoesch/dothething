@@ -1,4 +1,9 @@
-import { relations, sql } from "drizzle-orm";
+import {
+  relations,
+  sql,
+  type ColumnBaseConfig,
+  type ColumnDataType,
+} from "drizzle-orm";
 import { index, pgTableCreator, primaryKey } from "drizzle-orm/pg-core";
 import type * as DrizzleBuilder from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -11,33 +16,17 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `dothething_${name}`);
 
-function PK(d: PGSchemaBuilder) {
-  return d
-    .varchar({ length: 255 })
-    .notNull()
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID());
-}
-
 export const recurringTasks = createTable("recurringTask", (d) => ({
-  id: PK(d),
+  ...DefaultFields(d),
   title: d.varchar({ length: 255 }),
 }));
 
 export const posts = createTable(
   "post",
   (d) => ({
-    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+    ...DefaultFields(d),
     name: d.varchar({ length: 256 }),
-    createdById: d
-      .varchar({ length: 255 })
-      .notNull()
-      .references(() => users.id),
-    createdAt: d
-      .timestamp({ withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+    createdById: ForeignKey(d, () => users.id),
   }),
   (t) => [
     index("created_by_idx").on(t.createdById),
@@ -46,7 +35,7 @@ export const posts = createTable(
 );
 
 export const users = createTable("user", (d) => ({
-  id: PK(d),
+  ...DefaultFields(d),
   name: d.varchar({ length: 255 }),
   email: d.varchar({ length: 255 }).notNull(),
   emailVerified: d
@@ -65,10 +54,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const accounts = createTable(
   "account",
   (d) => ({
-    userId: d
-      .varchar({ length: 255 })
-      .notNull()
-      .references(() => users.id),
+    userId: ForeignKey(d, () => users.id),
     type: d.varchar({ length: 255 }).$type<AdapterAccount["type"]>().notNull(),
     provider: d.varchar({ length: 255 }).notNull(),
     providerAccountId: d.varchar({ length: 255 }).notNull(),
@@ -94,10 +80,7 @@ export const sessions = createTable(
   "session",
   (d) => ({
     sessionToken: d.varchar({ length: 255 }).notNull().primaryKey(),
-    userId: d
-      .varchar({ length: 255 })
-      .notNull()
-      .references(() => users.id),
+    userId: ForeignKey(d, () => users.id),
     expires: d.timestamp({ mode: "date", withTimezone: true }).notNull(),
   }),
   (t) => [index("t_user_id_idx").on(t.userId)],
@@ -116,6 +99,45 @@ export const verificationTokens = createTable(
   }),
   (t) => [primaryKey({ columns: [t.identifier, t.token] })],
 );
+
+function PrimaryKey(d: PGSchemaBuilder) {
+  return {
+    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+  };
+}
+
+function ForeignKey(
+  d: PGSchemaBuilder,
+  foreignIdColumn: () => DrizzleBuilder.PgColumn<
+    ColumnBaseConfig<ColumnDataType, string>,
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    {},
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    {}
+  >,
+) {
+  return d.integer().notNull().references(foreignIdColumn);
+}
+
+function TimestampFields(d: PGSchemaBuilder) {
+  return {
+    createdAt: d
+      .timestamp({ withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: d
+      .timestamp({ withTimezone: true })
+      .notNull()
+      .$onUpdate(() => new Date()),
+  };
+}
+
+function DefaultFields(d: PGSchemaBuilder) {
+  return {
+    ...PrimaryKey(d),
+    ...TimestampFields(d),
+  };
+}
 
 type PGSchemaBuilder = {
   bigint: typeof DrizzleBuilder.bigint;

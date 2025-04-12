@@ -27,3 +27,15 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 ## How do I deploy this?
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+## TODO
+
+ - Schema
+  - Tasks have schedules
+  - Tasks can be marked as accomplished
+  - Tasks (all objects?) have timestamp markers
+  - Can show which tasks are overdue
+  - Tasks part of groups
+  - Groups part of users
+- Hosting
+- UI
