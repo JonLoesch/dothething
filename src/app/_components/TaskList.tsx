@@ -178,7 +178,10 @@ function TaskEdit(props: {
           <Button
             key={index}
             type={c.primary ? "submit" : undefined}
-            onClick={c.handler}
+            onClick={e => {
+              c.handler();
+              e.preventDefault();
+            }}
             color={c.primary ? 'default' : 'alternative'}
           >
             {c.label}

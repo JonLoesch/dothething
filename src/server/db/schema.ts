@@ -13,6 +13,13 @@ export const recurringTasks = createTable("recurringTask", (d) => ({
   // userId: UserId(d),
 }));
 
+export const pushSubscriptions = createTable('pushSubscriptions', d => ({
+  ...DefaultFields(d),
+  ...UserId(d),
+  endpoint: d.varchar().notNull(),
+  keys: d.jsonb().$type<Record<string, string>>().notNull(),
+}));
+
 export const scheduleValidator = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("weekly"),

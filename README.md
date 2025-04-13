@@ -39,3 +39,7 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
   - Groups part of users
 - Hosting
 - UI
+  - Separate editing and viewing GUIs
+  - Notifications UI
+    - service worker caching??
+- re turbo???

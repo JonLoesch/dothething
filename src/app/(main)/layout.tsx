@@ -35,6 +35,8 @@ import NavLink from "../_components/NavLink";
 import { HydrateClient } from "~/trpc/server";
 import { auth } from "~/server/auth";
 import { ConditionalWrap } from "../_util/ConditionalWrap";
+import { PushNotification } from "../_components/PushNotification";
+import { DefaultTooltipPlacement } from "../_util/defaultTooltipPlacement";
 
 const links: HeaderLink[] = [
   { name: "About", href: "/", sidebar: false, requiresLogin: false },
@@ -140,14 +142,13 @@ async function Layout(
                     </div>
                     <div className="hidden lg:ml-4 lg:block">
                       <div className="flex items-center">
-                        {/* <button
-                          type="button"
-                          className="relative shrink-0 rounded-full bg-indigo-600 p-1 text-indigo-200 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 focus:outline-hidden"
-                        >
-                          <span className="absolute -inset-1.5" />
-                          <span className="sr-only">View notifications</span>
-                          <BellIcon aria-hidden="true" className="size-6" />
-                        </button> */}
+                        {session?.user && (
+                          <div className="text-white [&_svg]:size-8">
+                            <DefaultTooltipPlacement value="bottom-end">
+                              <PushNotification />
+                            </DefaultTooltipPlacement>
+                          </div>
+                        )}
 
                         {/* Profile dropdown */}
                         {session?.user ? (
@@ -206,7 +207,10 @@ async function Layout(
                   <div className="space-y-1 px-2 pt-2 pb-3">
                     {links.map(
                       (item) =>
-                        !(item.sidebar || (item.requiresLogin && !session?.user)) && (
+                        !(
+                          item.sidebar ||
+                          (item.requiresLogin && !session?.user)
+                        ) && (
                           <NavLink
                             href={item.href}
                             passHref
@@ -264,6 +268,13 @@ async function Layout(
                             </>
                           )}
                         </div>
+                        {session?.user && (
+                          <div className="relative ml-auto shrink-0 text-white [&_svg]:size-6">
+                            <DefaultTooltipPlacement value="left">
+                              <PushNotification />
+                            </DefaultTooltipPlacement>
+                          </div>
+                        )}
                         {/* <button
                         type="button"
                         className="relative ml-auto shrink-0 rounded-full bg-indigo-600 p-1 text-indigo-200 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 focus:outline-hidden"
@@ -276,22 +287,24 @@ async function Layout(
                     )}
                     {session?.user && (
                       <div className="mt-3 space-y-1 px-2">
-                        {links.map((item) => (
-                          item.sidebar &&
-                          <NavLink
-                            key={item.name}
-                            legacyBehavior
-                            passHref
-                            href={item.href}
-                          >
-                            <DisclosureButton
-                              as="a"
-                              className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-indigo-500/75"
-                            >
-                              {item.name}
-                            </DisclosureButton>
-                          </NavLink>
-                        ))}
+                        {links.map(
+                          (item) =>
+                            item.sidebar && (
+                              <NavLink
+                                key={item.name}
+                                legacyBehavior
+                                passHref
+                                href={item.href}
+                              >
+                                <DisclosureButton
+                                  as="a"
+                                  className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-indigo-500/75"
+                                >
+                                  {item.name}
+                                </DisclosureButton>
+                              </NavLink>
+                            ),
+                        )}
                       </div>
                     )}
                   </div>
