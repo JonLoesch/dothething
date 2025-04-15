@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Tooltip } from "flowbite-react";
 import { useCallback, useState, type FC } from "react";
@@ -16,27 +16,27 @@ import { useDefaultTooltipPlacement } from "../_util/defaultTooltipPlacement";
 export const PushNotification: FC = () => {
   const isSubscribed = api.pushNotifications.isSubscribed.useQuery();
   const notificationsSupportedOnThisBrowser =
-    navigator &&
-    "serviceWorker" in navigator &&
+    typeof window !== "undefined" &&
     window &&
     "PushManager" in window &&
+    navigator &&
+    "serviceWorker" in navigator &&
     "showNotification" in ServiceWorkerRegistration.prototype;
 
   const subscribe = api.pushNotifications.subscribe.useMutation();
   const unsubscribe = api.pushNotifications.unsubscribe.useMutation();
-  const [permission, setPermission] = useState(Notification.permission);
+  const [permission, setPermission] = useState(typeof window !== 'undefined' ? Notification.permission : 'default');
   const [inFlight, setInFlight] = useState(false);
-  
+
   const wrapInFlight = useCallback((proc: () => Promise<void>) => {
     return async () => {
       try {
         setInFlight(true);
         await proc();
-      }
-       finally {
+      } finally {
         setInFlight(false);
-       }
-    }
+      }
+    };
   }, []);
 
   const placement = useDefaultTooltipPlacement();
@@ -44,15 +44,16 @@ export const PushNotification: FC = () => {
   const wrapperClass = "px-6 py-2";
 
   if (inFlight) {
-    return <Tooltip content="Pending ..." placement={placement}>
+    return (
+      <Tooltip content="Pending ..." placement={placement}>
         <div className={wrapperClass}>
           <ArrowPathIcon />
         </div>
       </Tooltip>
-  }
-  else if (isSubscribed.isLoading) {
+    );
+  } else if (isSubscribed.isLoading) {
     return (
-      <Tooltip content="Loading ..."  placement={placement}>
+      <Tooltip content="Loading ..." placement={placement}>
         <div className={wrapperClass}>
           <ArrowPathIcon />
         </div>
@@ -60,7 +61,10 @@ export const PushNotification: FC = () => {
     );
   } else if (!isSubscribed.isSuccess) {
     return (
-      <Tooltip content="Network error -- try refreshing the page" placement={placement}>
+      <Tooltip
+        content="Network error -- try refreshing the page"
+        placement={placement}
+      >
         <div className={wrapperClass}>
           <ExclamationCircleIcon className="text-red-600" />
         </div>
@@ -68,7 +72,10 @@ export const PushNotification: FC = () => {
     );
   } else if (isSubscribed.data) {
     return (
-      <Tooltip content="You are subscribed to push notifications from DoTheThing" placement={placement}>
+      <Tooltip
+        content="You are subscribed to push notifications from DoTheThing"
+        placement={placement}
+      >
         <div
           className={wrapperClass}
           onClick={wrapInFlight(async () => {
@@ -95,7 +102,10 @@ export const PushNotification: FC = () => {
     );
   } else if (!notificationsSupportedOnThisBrowser) {
     return (
-      <Tooltip content="Push Notifications are not supported on this web browser" placement={placement}>
+      <Tooltip
+        content="Push Notifications are not supported on this web browser"
+        placement={placement}
+      >
         <div className={wrapperClass}>
           <BellSlashIcon />
         </div>

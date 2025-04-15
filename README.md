@@ -38,8 +38,26 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
   - Tasks part of groups
   - Groups part of users
 - Hosting
+  - Migrations
 - UI
   - Separate editing and viewing GUIs
   - Notifications UI
     - service worker caching??
-- re turbo???
+
+## Target site layout
+
+Pages:
+  - About - to fill out later
+  - My stuff:
+    - List of task groups
+      - List of tasks
+      - each task group has notification settings / associated edit GUI
+    - Profile page
+      - edit linked notification methods
+  - Tech specs
+
+
+Modals?
+  - Edit / add notification vector GUI
+  - Edit / add recurring task
+

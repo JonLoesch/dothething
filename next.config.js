@@ -7,7 +7,7 @@ import withFlowbiteReact from "flowbite-react/plugin/nextjs";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  experimental: { typedRoutes: true },
+  // experimental: { typedRoutes: true },
 };
 
 export default withFlowbiteReact(config);
