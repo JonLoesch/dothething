@@ -43,6 +43,7 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
   - Separate editing and viewing GUIs
   - Notifications UI
     - service worker caching??
+- Branded ID types: https://orm.drizzle.team/docs/column-types/singlestore#customizing-data-type
 
 ## Target site layout
 

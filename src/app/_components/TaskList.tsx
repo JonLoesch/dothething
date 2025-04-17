@@ -10,23 +10,25 @@ import {
   Button,
   ButtonGroup,
   Label,
-  Select,
+  Sidebar,
   TextInput,
 } from "flowbite-react";
-import { scheduleValidator, type recurringTasks } from "~/server/db/schema";
-import { z } from "zod";
+import { type recurringTasks } from "~/server/db/schema";
 import { EnumSelect } from "../_util/EnumSelect";
-import { create } from "zustand";
+import type { Schedule } from "~/model/schedule";
+import type { ApiType } from "../_util/ApiType";
+import { SidebarLayout } from "./SidebarLayout";
 
 function useTaskState(init?: {
-  title: string,
-  frequency: string,
-  frequencyType: z.infer<typeof scheduleValidator>["type"]
+  title: string;
+  frequency: string;
+  frequencyType: Schedule["type"];
 }) {
   const [title, setTitle] = useState(init?.title ?? "");
   const [frequency, setFrequency] = useState(init?.frequency ?? "1");
-  const [frequencyType, setFrequencyType] =
-    useState<z.infer<typeof scheduleValidator>["type"]>(init?.frequencyType ?? "weekly");
+  const [frequencyType, setFrequencyType] = useState<Schedule["type"]>(
+    init?.frequencyType ?? "weekly",
+  );
 
   return useMemo(
     () => ({
@@ -40,28 +42,11 @@ function useTaskState(init?: {
     [frequency, frequencyType, title],
   );
 }
-// const useTaskState = create<{
-//   frequency: number;
-//   setFrequency: (v: number) => void;
-//   frequencyType: z.infer<typeof scheduleValidator>["type"];
-//   setFrequencyType: (v: z.infer<typeof scheduleValidator>["type"]) => void;
-// }>()((set) => ({
-//   frequency: 1,
-//   frequencyType: "weekly",
-//   setFrequency: (v: number) => set({ frequency: v }),
-//   setFrequencyType: (v: z.infer<typeof scheduleValidator>["type"]) =>
-//     set({ frequencyType: v }),
-// }));
 
-export const TaskList: FC<{
-  initialTasks: Array<typeof recurringTasks.$inferSelect>;
-}> = (props) => {
-  const all = api.task.all.useQuery(undefined, {
-    initialData: props.initialTasks,
-  });
+export const TaskList: FC = (props) => {
+  const all = api.task.allGroups.useQuery();
   const newTask = useTaskState();
   const add = api.task.add.useMutation();
-  useState<z.infer<typeof scheduleValidator>["type"]>("weekly");
 
   const submitNewTask = useCallback(() => {
     void add.mutateAsync(AsDbObject(newTask)).then(() => {
@@ -70,29 +55,39 @@ export const TaskList: FC<{
     });
   }, [add, all, newTask]);
 
-  return (
-    <div className="flex max-w-md flex-col gap-4">
-      {all.isSuccess && (
-        <Accordion>
-          {all.data.map((t) => (
-            <AccordionPanel key={t.id}>
-              <Task {...t} onChange={() => all.refetch()} />
-            </AccordionPanel>
-          ))}
-        </Accordion>
-      )}
+  const sidebar = <Sidebar>
 
-      <TaskEdit
-        state={newTask}
-        completions={[
-          {
-            label: "Add New Task",
-            primary: true,
-            handler: submitNewTask,
-          },
-        ]}
-      />
-    </div>
+  </Sidebar>;
+
+  return (
+    <SidebarLayout sidebar={sidebar}>
+      <div className="flex max-w-md flex-col gap-4">
+        {all.isSuccess && (
+          <Accordion>
+            {all.data.map((group) => (
+              <div key={group.id}>
+                {group.tasks.map((t) => (
+                  <AccordionPanel key={t.id}>
+                    <Task {...t} onChange={() => all.refetch()} />
+                  </AccordionPanel>
+                ))}
+              </div>
+            ))}
+          </Accordion>
+        )}
+
+        <TaskEdit
+          state={newTask}
+          completions={[
+            {
+              label: "Add New Task",
+              primary: true,
+              handler: submitNewTask,
+            },
+          ]}
+        />
+      </div>
+    </SidebarLayout>
   );
 };
 
@@ -103,11 +98,15 @@ function FromDbObject(dbo: typeof recurringTasks.$inferSelect) {
     frequency: frequency(),
   };
   function frequency() {
-    switch(dbo.schedule.type) {
-      case 'daily': return dbo.schedule.numberOfDays.toString();
-      case 'weekly': return dbo.schedule.numberOfWeeks.toString();
-      case 'monthly': return dbo.schedule.numberOfMonths.toString();
-      case 'yearly': return dbo.schedule.numberOfYears.toString();
+    switch (dbo.schedule.type) {
+      case "daily":
+        return dbo.schedule.numberOfDays.toString();
+      case "weekly":
+        return dbo.schedule.numberOfWeeks.toString();
+      case "monthly":
+        return dbo.schedule.numberOfMonths.toString();
+      case "yearly":
+        return dbo.schedule.numberOfYears.toString();
     }
   }
 }
@@ -116,20 +115,22 @@ function AsDbObject({
   title,
   frequency,
   frequencyType,
-}: ReturnType<typeof useTaskState>): Pick<
-  typeof recurringTasks.$inferSelect,
-  "schedule" | "title"
-> {
+}: ReturnType<typeof useTaskState>) {
   return {
     title: title,
     schedule: schedule(),
+    groupId: 1 as unknown as number & { __brand: "taskGroupId" },
   };
-  function schedule():  typeof recurringTasks.$inferSelect.schedule {
-    switch(frequencyType) {
-      case 'daily': return {type: frequencyType, numberOfDays: parseInt(frequency)};
-      case 'weekly': return {type: frequencyType, numberOfWeeks: parseInt(frequency)};
-      case 'monthly': return {type: frequencyType, numberOfMonths: parseInt(frequency)};
-      case 'yearly': return {type: frequencyType, numberOfYears: parseInt(frequency)};
+  function schedule(): typeof recurringTasks.$inferSelect.schedule {
+    switch (frequencyType) {
+      case "daily":
+        return { type: frequencyType, numberOfDays: parseInt(frequency) };
+      case "weekly":
+        return { type: frequencyType, numberOfWeeks: parseInt(frequency) };
+      case "monthly":
+        return { type: frequencyType, numberOfMonths: parseInt(frequency) };
+      case "yearly":
+        return { type: frequencyType, numberOfYears: parseInt(frequency) };
     }
   }
 }
@@ -178,11 +179,11 @@ function TaskEdit(props: {
           <Button
             key={index}
             type={c.primary ? "submit" : undefined}
-            onClick={e => {
+            onClick={(e) => {
               c.handler();
               e.preventDefault();
             }}
-            color={c.primary ? 'default' : 'alternative'}
+            color={c.primary ? "default" : "alternative"}
           >
             {c.label}
           </Button>
@@ -247,7 +248,7 @@ const Task: FC<
   );
 };
 
-function displaySchedule(schedule: z.infer<typeof scheduleValidator>) {
+function displaySchedule(schedule: Schedule) {
   switch (schedule.type) {
     case "daily":
       return `Every ${schedule.numberOfDays} days`;

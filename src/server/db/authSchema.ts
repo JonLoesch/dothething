@@ -9,11 +9,16 @@ import {
   type PGSchemaBuilder,
 } from "./util";
 
+type UserId = string & {
+  __brand: 'userId';
+};
+
 export const users = createTable("user", (d) => ({
   id: d
     .text("id")
+    .$type<UserId>()
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => crypto.randomUUID() as UserId),
   ...TimestampFields(d),
   name: d.varchar({ length: 255 }),
   email: d.varchar({ length: 255 }).notNull(),
@@ -30,6 +35,7 @@ export function UserId(d: PGSchemaBuilder) {
   return {
     userId: d
       .text()
+      .$type<UserId>()
       .notNull()
       .references(() => users.id),
   };

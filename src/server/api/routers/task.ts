@@ -1,40 +1,39 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
-import { recurringTasks, scheduleValidator } from "~/server/db/schema";
+import { validators } from "~/app/_util/validators";
+import { schedule } from "~/model/schedule";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { recurringTasks, taskGroups } from "~/server/db/schema";
 
 export const taskRouter = createTRPCRouter({
-  all: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.query.recurringTasks.findMany({
-      where: eq(recurringTasks.userId, ctx.session.user.id),
+  allGroups: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.query.taskGroups.findMany({
+      where: eq(taskGroups.userId, ctx.session.user.id),
+      with: {
+        tasks: true,
+      },
     });
-    // const post = await ctx.db.query.findFirst({
-    //   orderBy: (posts, { desc }) => [desc(posts.createdAt)],
-    // });
-
-    // return post ?? null;
   }),
-  // all: publicProcedure.query(async ({ ctx }) => {
-  //   return ctx.db.query.recurringTasks.findMany();
-  // }),
+
   add: protectedProcedure
     .input(
       z.object({
+        groupId: validators.taskGroupId,
         title: z.string().trim().min(1),
-        schedule: scheduleValidator,
+        schedule: schedule.validator,
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const result = await ctx.db
         .insert(recurringTasks)
         .values({
+          groupId: input.groupId,
           title: input.title,
-          userId: ctx.session.user.id,
           schedule: input.schedule,
+          lastAccomplishedAt: new Date().toDateString(),
+          nextDueDate: schedule
+            .nextInstance(input.schedule, new Date())
+            .toDateString(),
         })
         .returning({
           id: recurringTasks.id,
@@ -44,26 +43,32 @@ export const taskRouter = createTRPCRouter({
   remove: protectedProcedure
     .input(
       z.object({
-        id: z.number(),
+        id: validators.taskId,
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db
-        .delete(recurringTasks)
-        .where(
-          and(
-            eq(recurringTasks.id, input.id),
-            eq(recurringTasks.userId, ctx.session.user.id),
+      await ctx.db.delete(recurringTasks).where(
+        and(
+          inArray(
+            recurringTasks.groupId,
+            ctx.db
+              .select({
+                data: taskGroups.id,
+              })
+              .from(taskGroups)
+              .where(eq(taskGroups.userId, ctx.session.user.id)),
           ),
-        );
+          eq(recurringTasks.id, input.id),
+        ),
+      );
     }),
 
   edit: protectedProcedure
     .input(
       z.object({
-        id: z.number(),
+        id: validators.taskId,
         title: z.string(),
-        schedule: scheduleValidator,
+        schedule: schedule.validator,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -75,8 +80,16 @@ export const taskRouter = createTRPCRouter({
         })
         .where(
           and(
+            inArray(
+              recurringTasks.groupId,
+              ctx.db
+                .select({
+                  data: taskGroups.id,
+                })
+                .from(taskGroups)
+                .where(eq(taskGroups.userId, ctx.session.user.id)),
+            ),
             eq(recurringTasks.id, input.id),
-            eq(recurringTasks.userId, ctx.session.user.id),
           ),
         );
     }),

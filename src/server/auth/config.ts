@@ -20,7 +20,7 @@ import {
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
-      id: string;
+      id: string & {__brand: 'userId'};
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];

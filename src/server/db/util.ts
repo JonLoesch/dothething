@@ -1,7 +1,8 @@
 import type * as DrizzleBuilder from "drizzle-orm/pg-core";
 import { sql, type ColumnBaseConfig, type ColumnDataType } from "drizzle-orm";
-import { pgTableCreator } from "drizzle-orm/pg-core";
+import { pgTableCreator, foreignKey } from "drizzle-orm/pg-core";
 import snakify from "snakify-ts";
+import type { z } from "zod";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -14,23 +15,40 @@ export const createTable = pgTableCreator(
   (name: string) => `dothething_${snakify(name, true)}`,
 );
 
-function PrimaryKey(d: PGSchemaBuilder) {
+function PrimaryKey<T extends string>(d: PGSchemaBuilder, idName: T) {
   return {
-    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+    id: d
+      .integer(idName)
+      .$type<number & { __brand: T }>()
+      .primaryKey()
+      .generatedByDefaultAsIdentity(),
   };
 }
 
-export function ForeignKey(
-  d: PGSchemaBuilder,
-  foreignIdColumn: () => DrizzleBuilder.PgColumn<
-    ColumnBaseConfig<ColumnDataType, string>,
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    {}
+export function FK<
+  T extends DrizzleBuilder.PgColumn<
+    ColumnBaseConfig<"number", string> & {
+      data: number & { __brand: string };
+    }
   >,
+>(
+  d: PGSchemaBuilder,
+  _foreignIdColumn: () => T,
 ) {
-  return d.integer().notNull().references(foreignIdColumn);
+  return d.integer().$type<T["_"]["data"]>().notNull();
+}
+
+export function FK_Constraint(
+  column: DrizzleBuilder.ExtraConfigColumn<
+    ColumnBaseConfig<ColumnDataType, string>
+  >,
+  foreignId: DrizzleBuilder.PgColumn<ColumnBaseConfig<ColumnDataType, string>>,
+) {
+  return foreignKey({
+    columns: [column],
+    foreignColumns: [foreignId],
+    name: foreignId.name,
+  });
 }
 
 export function TimestampFields(d: PGSchemaBuilder) {
@@ -47,9 +65,9 @@ export function TimestampFields(d: PGSchemaBuilder) {
   };
 }
 
-export function DefaultFields(d: PGSchemaBuilder) {
+export function DefaultFields<T extends string>(d: PGSchemaBuilder, idType: T) {
   return {
-    ...PrimaryKey(d),
+    ...PrimaryKey(d, idType),
     ...TimestampFields(d),
   };
 }
@@ -88,3 +106,35 @@ export type PGSchemaBuilder = {
   sparsevec: typeof DrizzleBuilder.sparsevec;
   vector: typeof DrizzleBuilder.vector;
 };
+
+export function jsonb<
+  ZodSchema extends z.ZodTypeAny,
+  TExtraFields extends Record<string, unknown> = Record<never, unknown>,
+>(
+  d: PGSchemaBuilder,
+  validator: ZodSchema,
+  fromDriver?: (data: z.infer<ZodSchema>) => z.infer<ZodSchema> & TExtraFields,
+) {
+  return d
+    .customType<{
+      data: z.infer<ZodSchema> & TExtraFields;
+      driverData: z.infer<ZodSchema>;
+    }>({
+      dataType() {
+        return "jsonb";
+      },
+      toDriver(value) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
+        return JSON.stringify(value) as any;
+      },
+      fromDriver,
+      // fromDriver(value) {
+      //   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      //   return {
+      //     ...value,
+      //     ...getExtraFields(value),
+      //   };
+      // },
+    })()
+    .notNull();
+}
