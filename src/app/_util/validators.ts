@@ -28,3 +28,6 @@ export function idFromColumn<
     number & { __brand: T["_"]["data"]["__brand"] }
   >;
 }
+
+export type TaskGroupId = z.infer<typeof validators.taskGroupId>;
+export type TaskId = z.infer<typeof validators.taskId>;

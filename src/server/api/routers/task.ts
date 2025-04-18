@@ -15,6 +15,26 @@ export const taskRouter = createTRPCRouter({
     });
   }),
 
+  addGroup: protectedProcedure
+    .input(
+      z.object({
+        title: z.string().trim().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.db
+        .insert(taskGroups)
+        .values({
+          title: input.title,
+          userId: ctx.session.user.id,
+          lastNotification: new Date().toDateString(),
+        })
+        .returning({
+          id: taskGroups.id,
+        });
+      return result[0]?.id;
+    }),
+
   add: protectedProcedure
     .input(
       z.object({
@@ -39,6 +59,22 @@ export const taskRouter = createTRPCRouter({
           id: recurringTasks.id,
         });
       return result[0]?.id;
+    }),
+  removeGroup: protectedProcedure
+    .input(
+      z.object({
+        id: validators.taskGroupId,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(taskGroups)
+        .where(
+          and(
+            eq(taskGroups.userId, ctx.session.user.id),
+            eq(taskGroups.id, input.id),
+          ),
+        );
     }),
   remove: protectedProcedure
     .input(

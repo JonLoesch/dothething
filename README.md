@@ -44,6 +44,10 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
   - Notifications UI
     - service worker caching??
 - Branded ID types: https://orm.drizzle.team/docs/column-types/singlestore#customizing-data-type
+- toDateString shouldn't be littered (centralize in DB adapter)
+- immer might be good for useMutation optimistic updates
+- Remove silly @title route pattern
+- tying zod validators to forms
 
 ## Target site layout
 

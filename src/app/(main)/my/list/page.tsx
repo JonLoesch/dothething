@@ -1,7 +1,8 @@
 import { TaskList } from "~/app/_components/TaskList";
-import type { NextServerComponent } from "~/app/_util/NextTypes";
+import { api } from "~/trpc/server";
 
-const ListPage: NextServerComponent = async () => {
-  return <TaskList/>
-};
-export default ListPage;
+export default async function ListPage() {
+  await api.task.allGroups.prefetch();
+
+  return <TaskList />;
+}
