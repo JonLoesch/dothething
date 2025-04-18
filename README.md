@@ -30,19 +30,23 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 
 ## TODO
 
-- Hosting
-  - Migrations
-- UI
-  - Notifications UI - service worker caching??
-- toDateString shouldn't be littered (centralize in DB adapter)
-- immer might be good for useMutation optimistic updates
-- Remove silly @title route pattern
-- tying zod validators to forms
-- Get NavLinks back (current page in site map should have visual indicator)
-- Sign in / sign out widget sprucing up
+## TODO Next
+- Test on mobile browser
+
+## TODO Later
+- mailto header on VAPID details
+- Look into zod branding
+- DaisyUI Status on tasks
 - show # of groups on profile subscription page, disable delete if nonzero
 - Suggest a feature form (notification types)
-- DaisyUI Status on tasks
+- Sign in / sign out widget sprucing up
+- Get NavLinks back (current page in site map should have visual indicator)
+- tying zod validators to forms
+- Remove silly @title route pattern
+- immer might be good for useMutation optimistic updates
+- toDateString shouldn't be littered (centralize in DB adapter)
+- Hosting / Migrations
+- Notifications UI - service worker caching??
 
 ## Target site layout
 

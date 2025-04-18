@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { UAParser } from "ua-parser-js";
 import { z } from "zod";
 import { validators } from "~/app/_util/validators";
@@ -53,7 +53,9 @@ export const notificationRouter = createTRPCRouter({
   createPushTarget: protectedProcedure
     .input(pushConfig.validator)
     .mutation(async ({ ctx, input }) => {
-      const ua = await UAParser(Object.fromEntries(ctx.headers)).withClientHints();
+      const ua = await UAParser(
+        Object.fromEntries(ctx.headers),
+      ).withClientHints();
       return await ctx.db.transaction(async (tx) => {
         const targetId = (
           await tx
@@ -95,6 +97,28 @@ export const notificationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // await ctx.db
+      //   .insert(subscriptions)
+      //   .select(
+      //     ctx.db
+      //     .select({
+      //         id: sql<number>`nextval('"dothething_subscriptions_subscriptionId_seq"'::regclass)`.as('id'),
+      //         createdAt: sql`now()`.as('createdAt'),
+      //         updatedAt: sql`now()`.as('updatedAt'),
+      //         deletedAt: sql`null`.as('deletedAt'),
+      //         targetId: notificationTargets.id,
+      //         groupId: taskGroups.id,
+      //       })
+      //       .from(taskGroups)
+      //       .innerJoin(notificationTargets, eq(notificationTargets.userId, taskGroups.userId))
+      //       .where(
+      //         and(
+      //           eq(taskGroups.userId, ctx.session.user.id),
+      //           eq(taskGroups.id, input.groupId),
+      //           eq(notificationTargets.id, input.targetId),
+      //         ),
+      //       ),
+      //   );
       const myTargets = ctx.db.$with("targets").as(
         ctx.db
           .select({ targetId: notificationTargets.id })
@@ -122,8 +146,8 @@ export const notificationRouter = createTRPCRouter({
         .with(myTargets, myGroups)
         .insert(subscriptions)
         .values({
-          groupId: sql`${myGroups.groupId}`,
-          targetId: sql`${myTargets.targetId}`,
+          groupId: sql`(select * from ${myGroups})`,
+          targetId: sql`(select * from ${myTargets})`,
         });
     }),
   unsubscribe: protectedProcedure
@@ -162,8 +186,8 @@ export const notificationRouter = createTRPCRouter({
         .delete(subscriptions)
         .where(
           and(
-            eq(subscriptions.groupId, sql`${myGroups.groupId}`),
-            eq(subscriptions.targetId, sql`${myTargets.targetId}`),
+            inArray(subscriptions.groupId, sql`(select * from ${myGroups})`),
+            inArray(subscriptions.targetId, sql`(select * from ${myTargets})`),
           ),
         );
     }),

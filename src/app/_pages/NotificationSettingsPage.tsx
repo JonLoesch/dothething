@@ -8,6 +8,7 @@ import { usePushNotifications } from "../_util/pushNotifications";
 import { validators } from "../_util/validators";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { pushConfig } from "~/model/pushConfig";
+import { api } from "~/trpc/react";
 
 export const NotificationSettingsPage: FC = () => {
   const {
@@ -18,6 +19,7 @@ export const NotificationSettingsPage: FC = () => {
     browserSubscriptionEndpoint,
     removeTarget,
   } = usePushNotifications();
+  const testCron = api.crons.runTestNotifications.useMutation();
 
   return (
     <PageLayout title={titles.notificationSettings}>
@@ -26,7 +28,7 @@ export const NotificationSettingsPage: FC = () => {
           allTargets.data.map((t) => (
             <li key={t.id} className="list-row">
               <div className="list-col-grow">
-                Push Notification to {t.title}
+                {t.title}
                 {t.configs.find(
                   (c) => c.endpoint === browserSubscriptionEndpoint,
                 )
@@ -56,6 +58,9 @@ export const NotificationSettingsPage: FC = () => {
           Subscribe
         </button>
       )}
+      <button className='btn' onClick={() => testCron.mutate()}>
+        Test Crons
+      </button>
     </PageLayout>
   );
 };

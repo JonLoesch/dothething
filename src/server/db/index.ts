@@ -22,4 +22,5 @@ export const db = drizzle(conn, {
     ...authSchema,
   },
   casing: "snake_case",
+  // logger: true,
 });

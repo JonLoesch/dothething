@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TaskList } from "~/app/_components/TaskList";
+import { TaskListPage } from "~/app/_pages/TaskListPage";
 import { titles } from "~/app/_util/titles";
 import { api } from "~/trpc/server";
 
@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 
 export default async function ListPage() {
   await api.task.allGroups.prefetch();
+  await api.notifications.allTargets.prefetch();
 
-  return <TaskList />;
+  return <TaskListPage />;
 }

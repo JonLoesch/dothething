@@ -26,8 +26,9 @@ export const taskGroups = createTable("taskGroups", (d) => ({
 
 export const groupRelations = relations(taskGroups, ({ many }) => ({
   tasks: many(recurringTasks),
+  subscriptions: many(subscriptions),
 }));
-export const taskRelations = relations(recurringTasks, ({ one }) => ({
+export const taskRelations = relations(recurringTasks, ({ one, many }) => ({
   group: one(taskGroups, {
     fields: [recurringTasks.groupId],
     references: [taskGroups.id],
@@ -50,6 +51,10 @@ export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
   target: one(notificationTargets, {
     fields: [subscriptions.targetId],
     references: [notificationTargets.id],
+  }),
+  group: one(taskGroups, {
+    fields: [subscriptions.groupId],
+    references: [taskGroups.id],
   }),
 }));
 

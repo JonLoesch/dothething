@@ -1,6 +1,4 @@
 import { z } from "zod";
-import { UAParser } from "ua-parser-js";
-import { ExtraDevices } from "ua-parser-js/extensions";
 import type { pushConfigs } from "~/server/db/schema";
 
 const validator = z.object({
@@ -19,7 +17,7 @@ function FromDb({ ua, ...p }: typeof pushConfigs.$inferSelect) {
 }
 
 function defaultTargetName(ua: UAParser.IResult) {
-    return `${ua.browser.name} (${ua.os.name} ${ua.os.version})`;
+    return `Push Notification to ${ua.browser.name} (${ua.os.name} ${ua.os.version})`;
 }
 
 export const pushConfig = {

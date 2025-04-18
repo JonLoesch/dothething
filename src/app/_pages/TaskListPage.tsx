@@ -4,7 +4,7 @@ import { useMemo, useState, type FC, type PropsWithChildren } from "react";
 import { api } from "~/trpc/react";
 import { type recurringTasks } from "~/server/db/schema";
 import { type Schedule } from "~/model/schedule";
-import { PageLayout } from "./PageLayout";
+import { PageLayout } from "../_components/PageLayout";
 import { _brand } from "../_util/brandId";
 import type { TaskGroupId } from "../_util/validators";
 import { z } from "zod";
@@ -13,7 +13,8 @@ import { titles } from "../_util/titles";
 
 let dec = -1;
 
-export const TaskList: FC = () => {
+export const TaskListPage: FC = () => {
+  const allTargets = api.notifications.allTargets.useQuery();
   const allGroups = api.task.allGroups.useQuery();
   const utils = api.useUtils();
   const addGroup = api.task.addGroup.useMutation({
@@ -127,6 +128,16 @@ export const TaskList: FC = () => {
       allGroups.data.find((x) => x.id === selectedGroupId),
     [allGroups, selectedGroupId],
   );
+  const subscribe = api.notifications.subscribe.useMutation({
+    onSettled(_data, _error, _variables, _context) {
+      void utils.notifications.allTargets.invalidate();
+    },
+  });
+  const unsubscribe = api.notifications.unsubscribe.useMutation({
+    onSettled(_data, _error, _variables, _context) {
+      void utils.notifications.allTargets.invalidate();
+    },
+  });
 
   const sidebar = !allGroups.isSuccess ? null : (
     <>
@@ -226,6 +237,64 @@ export const TaskList: FC = () => {
             </select>
           </Form>
 
+          {allTargets.isSuccess && (
+            <>
+              <ul className="list">
+                <div className="self-center font-bold uppercase">
+                  Sends notifications to:
+                </div>
+                {allTargets.data.map((t) =>
+                  t.subscriptions.find((x) => x.groupId === selectedGroupId) ? (
+                    <li className="list-row" key={t.id}>
+                      <div className="list-col-grow">{t.title}</div>
+
+                      <button
+                        className="btn btn-circle btn-ghost text-error size-5"
+                        onClick={() =>
+                          unsubscribe.mutate({
+                            targetId: t.id,
+                            groupId: selectedGroup.id,
+                          })
+                        }
+                      >
+                        <TrashIcon />
+                      </button>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+              <Form
+                onSubmit={(values) => {
+                  subscribe.mutate({
+                    ...z
+                      .object({
+                        targetId: z
+                          .string()
+                          .transform((x) =>
+                            _brand<"notificationTargetId">(parseInt(x)),
+                          ),
+                      })
+                      .parse(values),
+                    groupId: selectedGroup.id,
+                  });
+                }}
+              >
+                <select name="targetId">
+                  {allTargets.data.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.title}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="submit"
+                  className="btn"
+                  value="Subscribe to notifications"
+                />
+              </Form>
+            </>
+          )}
+
           <button
             className="btn btn-ghost btn-outline text-error self-end"
             onClick={() => removeGroup.mutate(selectedGroup)}
@@ -241,7 +310,7 @@ export const TaskList: FC = () => {
 
 function Form(
   props: PropsWithChildren<{
-    onSubmit: (values: Record<string, unknown>) => void;
+    onSubmit?: (this: HTMLFormElement, values: Record<string, unknown>) => void;
   }>,
 ) {
   return (
@@ -249,8 +318,9 @@ function Form(
       action="#"
       onSubmit={(e) => {
         e.preventDefault();
-        props.onSubmit(
-          Object.fromEntries(new FormData(e.target as HTMLFormElement)),
+        props.onSubmit?.call(
+          e.currentTarget,
+          Object.fromEntries(new FormData(e.currentTarget)),
         );
       }}
     >
