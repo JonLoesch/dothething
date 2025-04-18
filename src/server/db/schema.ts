@@ -34,24 +34,51 @@ export const taskRelations = relations(recurringTasks, ({ one }) => ({
   }),
 }));
 
-export const pushSubscriptions = createTable(
-  "pushSubscriptions",
+export const subscriptions = createTable(
+  "subscriptions",
   (d) => ({
-    ...DefaultFields(d, "pushSubscriptionId"),
-    configId: FK(d, () => pushConfigs.id),
+    ...DefaultFields(d, "subscriptionId"),
+    targetId: FK(d, () => notificationTargets.id),
     groupId: FK(d, () => taskGroups.id),
   }),
   (table) => [
-    FK_Constraint(table.configId, pushConfigs.id),
+    FK_Constraint(table.targetId, notificationTargets.id),
     FK_Constraint(table.groupId, taskGroups.id),
   ],
 );
+export const subscriptionRelations = relations(subscriptions, ({one}) => ({
+  target: one(notificationTargets, {
+    fields: [subscriptions.targetId],
+    references: [notificationTargets.id],
+  })
+}));
 
-export const pushConfigs = createTable("pushConfigs", (d) => ({
-  ...DefaultFields(d, "pushSubscriptionId"),
+
+export const notificationTargets = createTable("notificationTargets", (d) => ({
+  ...DefaultFields(d, "notificationTargetId"),
   ...UserId(d),
-  endpoint: d.varchar().notNull(),
-  keys: d.jsonb().$type<Record<string, string>>().notNull(),
+}));
+
+export const notificationTargetRelations = relations(notificationTargets, ({many}) => ({
+  configs: many(pushConfigs),
+  subscriptions: many(subscriptions),
+}));
+
+export const pushConfigs = createTable(
+  "pushConfigs",
+  (d) => ({
+    ...DefaultFields(d, "pushConfigId"),
+    targetId: FK(d, () => notificationTargets.id),
+    endpoint: d.varchar().notNull().unique(),
+    keys: d.jsonb().$type<Record<string, string>>().notNull(),
+  }),
+  (table) => [FK_Constraint(table.targetId, notificationTargets.id).onDelete("cascade")],
+);
+export const configRelations = relations(pushConfigs, ({one}) => ({
+  target: one(notificationTargets, {
+    fields: [pushConfigs.targetId],
+    references: [notificationTargets.id],
+  })
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({

@@ -30,24 +30,22 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 
 ## TODO
 
- - Schema
-  - Tasks have schedules
-  - Tasks can be marked as accomplished
-  - Tasks (all objects?) have timestamp markers
-  - Can show which tasks are overdue
-  - Tasks part of groups
-  - Groups part of users
 - Hosting
   - Migrations
 - UI
-  - Separate editing and viewing GUIs
-  - Notifications UI
-    - service worker caching??
-- Branded ID types: https://orm.drizzle.team/docs/column-types/singlestore#customizing-data-type
+  - Notifications UI - service worker caching??
 - toDateString shouldn't be littered (centralize in DB adapter)
 - immer might be good for useMutation optimistic updates
 - Remove silly @title route pattern
 - tying zod validators to forms
+- Get NavLinks back (current page in site map should have visual indicator)
+- Sign in / sign out widget sprucing up
+- notificationTargets should have names (editable)
+- record UA with subscription, display https://uaparser.dev/
+- show # of groups on profile subscription page, disable delete if nonzero
+- Rename profile page to notification settings
+- Suggest a feature form (notification types)
+- DaisyUI Status on tasks
 
 ## Target site layout
 
@@ -60,7 +58,6 @@ Pages:
     - Profile page
       - edit linked notification methods
   - Tech specs
-
 
 Modals?
   - Edit / add notification vector GUI

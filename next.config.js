@@ -3,11 +3,10 @@
  * for Docker builds.
  */
 import "./src/env.js";
-import withFlowbiteReact from "flowbite-react/plugin/nextjs";
 
 /** @type {import("next").NextConfig} */
 const config = {
   // experimental: { typedRoutes: true },
 };
 
-export default withFlowbiteReact(config);
+export default config;

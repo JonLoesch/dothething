@@ -1,0 +1,64 @@
+"use client";
+
+import type { FC } from "react";
+import { PageLayout } from "../_components/PageLayout";
+import { titles } from "../_util/titles";
+import { env } from "~/env";
+import { usePushNotifications } from "../_util/pushNotifications";
+import { validators } from "../_util/validators";
+import { TrashIcon } from "@heroicons/react/24/outline";
+
+export const ProfilePage: FC = () => {
+  const {
+    allTargets,
+    createPushTarget,
+    requestPushNotifications,
+    isSubscribed,
+    browserSubscriptionEndpoint,
+    removeTarget,
+  } = usePushNotifications();
+
+  return (
+    <PageLayout title={titles.profile}>
+      <div className="list">
+        {allTargets.isSuccess &&
+          allTargets.data.map((t) => (
+            <li key={t.id} className="list-row">
+              <div className="list-col-grow">
+                Browser push notification{" "}
+                {t.configs.find(
+                  (c) => c.endpoint === browserSubscriptionEndpoint,
+                )
+                  ? "(this browser)"
+                  : ""}{" "}
+              </div>
+              <button
+                className="btn btn-circle btn-ghost text-error size-5"
+                onClick={() => removeTarget.mutate(t)}
+              >
+                <TrashIcon />
+              </button>
+            </li>
+          ))}
+      </div>
+      {isSubscribed === "no" && (
+        <button
+          className="btn"
+          onClick={() => {
+            void requestPushNotifications().then(
+              (r) =>
+                r &&
+                createPushTarget.mutate(
+                  validators.requests.pushNotificationSubscription.parse(
+                    r.toJSON(),
+                  ),
+                ),
+            );
+          }}
+        >
+          Subscribe
+        </button>
+      )}
+    </PageLayout>
+  );
+};

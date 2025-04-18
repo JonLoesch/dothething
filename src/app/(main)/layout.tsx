@@ -1,6 +1,5 @@
 import "~/styles/globals.css";
 
-
 import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/styles/globals.css";
@@ -9,10 +8,15 @@ import Link from "next/link";
 import { HydrateClient } from "~/trpc/server";
 import { auth } from "~/server/auth";
 import type { PropsWithChildren } from "react";
+import type { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "DoTheThing",
+  description: "A simple reminder application",
+  icons: [{ rel: "icon", url: "/favicon.ico" }],
+};
 
 export default async function Layout(props: PropsWithChildren) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const session = await auth();
 
   return (
@@ -30,7 +34,13 @@ export default async function Layout(props: PropsWithChildren) {
                     <Link href="/my/list">My Stuff</Link>
                     <Link href="/my/profile">Profile</Link>
                   </div>
-                  <div className="navbar-end flex flex-row"></div>
+                  <div className="navbar-end flex flex-row">
+                    {session?.user ? (
+                      "You are signed in"
+                    ) : (
+                      <Link href="/api/auth/signin">Sign in</Link>
+                    )}
+                  </div>
                   <div className="border-primary-content/50 absolute inset-x-12 bottom-0 h-0 border-b" />
                 </div>
               </div>
@@ -41,4 +51,4 @@ export default async function Layout(props: PropsWithChildren) {
       </body>
     </html>
   );
-};
+}

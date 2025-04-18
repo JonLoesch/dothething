@@ -30,7 +30,7 @@ export default tseslint.config(
         { prefer: "type-imports", fixStyle: "inline-type-imports" },
       ],
       "@typescript-eslint/no-unused-vars": [
-        "warn",
+        "off",
         { argsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/require-await": "off",

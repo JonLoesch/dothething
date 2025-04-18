@@ -1,11 +1,8 @@
-import type { FC } from "react";
+import { ProfilePage } from "~/app/_pages/ProfilePage";
+import { titles } from "~/app/_util/titles";
 
-const Page: FC = () => {
-  return (
-    <>
-      Your profile
-    </>
-  );
-};
+export const metadata = { title: titles.profile };
 
-export default Page;
+export default async function Profile() {
+  return <ProfilePage />;
+}

@@ -4,11 +4,12 @@ import { useMemo, useState, type FC, type PropsWithChildren } from "react";
 import { api } from "~/trpc/react";
 import { type recurringTasks } from "~/server/db/schema";
 import { type Schedule } from "~/model/schedule";
-import { PageLayout } from "./Layout";
+import { PageLayout } from "./PageLayout";
 import { _brand } from "../_util/brandId";
 import type { TaskGroupId } from "../_util/validators";
 import { z } from "zod";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { titles } from "../_util/titles";
 
 let dec = -1;
 
@@ -164,7 +165,7 @@ export const TaskList: FC = () => {
   );
 
   return (
-    <PageLayout title="My Things (to do)" sidebar={sidebar}>
+    <PageLayout title={titles.list} sidebar={sidebar}>
       {selectedGroup && (
         <div className="list bg-base-300 gap-4 rounded p-4">
           <div className="self-center font-bold uppercase">

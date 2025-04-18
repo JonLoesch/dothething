@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PageLayout } from "../_components/Layout";
+import { PageLayout } from "../_components/PageLayout";
 
 export default async function Home() {
     
