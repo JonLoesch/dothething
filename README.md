@@ -31,23 +31,28 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 ## TODO
 
 ## TODO Next
+- Fucking fix NextAuth beta bullshit goddamn
+- Mobile friendly
 
+
+- DaisyUI Status on tasks
+- Remove silly @title route pattern
+- toDateString shouldn't be littered (centralize in DB adapter)
+- Look into zod branding
+- tying zod validators to forms
+- 
 ## TODO Later
 - mailto header on VAPID details
-- Look into zod branding
-- DaisyUI Status on tasks
 - show # of groups on profile subscription page, disable delete if nonzero
 - Suggest a feature form (notification types)
 - Sign in / sign out widget sprucing up
 - Get NavLinks back (current page in site map should have visual indicator)
-- tying zod validators to forms
-- Remove silly @title route pattern
 - immer might be good for useMutation optimistic updates
-- toDateString shouldn't be littered (centralize in DB adapter)
 - Hosting / Migrations
 - Notifications UI - service worker caching??
 - Test all cases of notification / permissions :(
 - Another notification type
+- use browser icons from uaparser
 
 ## Target site layout
 

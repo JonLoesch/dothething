@@ -32,13 +32,22 @@ export default async function Layout(props: PropsWithChildren) {
                   </div>
                   <div className="[&_a]:btn [&_a]:btn-ghost navbar-center flex flex-row [&_a]:text-xl">
                     <Link href="/my/list">My Stuff</Link>
-                    <Link href="/my/notification-settings">Notification Settings</Link>
+                    <Link href="/my/notification-settings">
+                      Notification Settings
+                    </Link>
                   </div>
                   <div className="navbar-end flex flex-row">
                     {session?.user ? (
-                      "You are signed in"
+                      <>
+                        You are signed in
+                        <Link href="/api/auth/signout" className="btn">
+                          Sign out
+                        </Link>
+                      </>
                     ) : (
-                      <Link href="/api/auth/signin">Sign in</Link>
+                      <>
+                        <Link href="/api/auth/signin">Sign in</Link>
+                      </>
                     )}
                   </div>
                   <div className="border-primary-content/50 absolute inset-x-12 bottom-0 h-0 border-b" />
