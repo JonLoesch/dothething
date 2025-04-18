@@ -31,7 +31,6 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 ## TODO
 
 ## TODO Next
-- Test on mobile browser
 
 ## TODO Later
 - mailto header on VAPID details
@@ -47,6 +46,8 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - toDateString shouldn't be littered (centralize in DB adapter)
 - Hosting / Migrations
 - Notifications UI - service worker caching??
+- Test all cases of notification / permissions :(
+- Another notification type
 
 ## Target site layout
 

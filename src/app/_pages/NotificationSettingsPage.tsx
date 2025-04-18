@@ -16,8 +16,8 @@ export const NotificationSettingsPage: FC = () => {
     createPushTarget,
     requestPushNotifications,
     isSubscribed,
-    browserSubscriptionEndpoint,
     removeTarget,
+    browserData,
   } = usePushNotifications();
   const testCron = api.crons.runTestNotifications.useMutation();
 
@@ -30,7 +30,9 @@ export const NotificationSettingsPage: FC = () => {
               <div className="list-col-grow">
                 {t.title}
                 {t.configs.find(
-                  (c) => c.endpoint === browserSubscriptionEndpoint,
+                  (c) =>
+                    typeof browserData !== "string" &&
+                    c.endpoint === browserData.endpoint,
                 )
                   ? " (this browser)"
                   : ""}
@@ -58,7 +60,12 @@ export const NotificationSettingsPage: FC = () => {
           Subscribe
         </button>
       )}
-      <button className='btn' onClick={() => testCron.mutate()}>
+      {isSubscribed === 'denied' && (
+        <div>
+          You have disabled push notifications in your browser.  In order to subscribe to notifications, please adjust your browser settings and refresh the page.
+        </div>
+      )}
+      <button className="btn" onClick={() => testCron.mutate()}>
         Test Crons
       </button>
     </PageLayout>

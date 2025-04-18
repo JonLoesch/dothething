@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { env } from "~/env";
 import { api } from "~/trpc/react";
 
@@ -18,29 +18,27 @@ export function usePushNotifications() {
     },
   });
 
-  const subscriptionPromise = useMemo(
-    () =>
-      (async () => {
-        if (typeof navigator === 'undefined') return;
-        const registration = await navigator.serviceWorker.register("/sw.js");
-        return (
-          (await registration.pushManager.getSubscription()) ??
-          (await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-          }))
-        );
-      })(),
-    [],
-  );
-  const [subscription, setSubscription] = useState<
-    undefined | PushSubscription
-  >();
-  useEffect(() => {
-    void subscriptionPromise.then(setSubscription);
-  }, [subscriptionPromise]);
+  const [browserData, setBrowserData] = useReducer<
+    "pending" | "denied" | { endpoint: string },
+    [PushSubscription | null]
+  >((state, sub: PushSubscription | null | "denied") => {
+    return sub
+      ? sub === "denied"
+        ? "denied"
+        : {
+            endpoint: sub.endpoint,
+          }
+      : state;
+  }, "pending");
+  const existingSubscriptionPromise = useMemo(async () => {
+    if (typeof navigator === "undefined") return;
+    const registration = await navigator.serviceWorker.register("/sw.js");
+    const existing = await registration.pushManager.getSubscription();
+    setBrowserData(existing);
+    return existing;
+  }, []);
   const requestPushNotifications = useCallback(async () => {
-    if (typeof Notification === 'undefined') return;
+    if (typeof Notification === "undefined") return;
     // TODO: support older browsers??
     // https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API#getting_permission
     const p = await Notification.requestPermission();
@@ -50,35 +48,47 @@ export function usePushNotifications() {
       );
       return;
     }
-    return await subscriptionPromise;
-  }, [subscriptionPromise]);
+    const existingSubsccription = await existingSubscriptionPromise;
+    if (!existingSubsccription) {
+      const registration = await navigator.serviceWorker.register("/sw.js");
+      const newSubscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      });
+      setBrowserData(newSubscription);
+      return newSubscription;
+    }
+  }, [existingSubscriptionPromise]);
   const isSubscribed = useMemo(() => {
-    if (subscription && allTargets.isSuccess) {
+    if (typeof browserData === "string") {
+      return browserData;
+    } else if (!allTargets.isSuccess) {
+      return "pending";
+    } else {
       return allTargets.data.find((x) =>
-        x.configs.find((c) => c.endpoint === subscription.endpoint),
+        x.configs.find((c) => c.endpoint === browserData.endpoint),
       )
         ? "yes"
         : "no";
-    } else {
-      return "pending";
     }
-  }, [subscription, allTargets]);
+  }, [browserData, allTargets]);
 
   return useMemo(
     () => ({
       requestPushNotifications,
       allTargets,
       createPushTarget,
-      isSubscribed,
-      browserSubscriptionEndpoint: subscription?.endpoint,
+      browserData,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      isSubscribed: isSubscribed as typeof isSubscribed,
       removeTarget,
     }),
     [
       requestPushNotifications,
       allTargets,
       createPushTarget,
+      browserData,
       isSubscribed,
-      subscription,
       removeTarget,
     ],
   );
