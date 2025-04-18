@@ -1,8 +1,15 @@
 import { and, eq, sql } from "drizzle-orm";
+import { UAParser } from "ua-parser-js";
 import { z } from "zod";
 import { validators } from "~/app/_util/validators";
+import { pushConfig } from "~/model/pushConfig";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { notificationTargets, pushConfigs, subscriptions, taskGroups } from "~/server/db/schema";
+import {
+  notificationTargets,
+  pushConfigs,
+  subscriptions,
+  taskGroups,
+} from "~/server/db/schema";
 
 export const notificationRouter = createTRPCRouter({
   // subscribe: protectedProcedure
@@ -30,23 +37,30 @@ export const notificationRouter = createTRPCRouter({
   // }),
 
   allTargets: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.notificationTargets.findMany({
-      where: eq(notificationTargets.userId, ctx.session.user.id),
-      with: {
-        configs: true,
-        subscriptions: true,
-      },
-    });
+    return (
+      await ctx.db.query.notificationTargets.findMany({
+        where: eq(notificationTargets.userId, ctx.session.user.id),
+        with: {
+          configs: true,
+          subscriptions: true,
+        },
+      })
+    ).map(({ configs, ...rest }) => ({
+      ...rest,
+      configs: configs.map(pushConfig.FromDb),
+    }));
   }),
   createPushTarget: protectedProcedure
-    .input(validators.requests.pushNotificationSubscription)
+    .input(pushConfig.validator)
     .mutation(async ({ ctx, input }) => {
+      const ua = await UAParser(Object.fromEntries(ctx.headers)).withClientHints();
       return await ctx.db.transaction(async (tx) => {
         const targetId = (
           await tx
             .insert(notificationTargets)
             .values({
               userId: ctx.session.user.id,
+              title: pushConfig.defaultTargetName(ua),
             })
             .returning({
               id: notificationTargets.id,
@@ -54,6 +68,7 @@ export const notificationRouter = createTRPCRouter({
         )[0]!.id;
         await tx.insert(pushConfigs).values({
           targetId,
+          ua: ua,
           endpoint: input.endpoint,
           keys: input.keys,
         });
@@ -80,48 +95,76 @@ export const notificationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const myTargets = ctx.db.$with('targets').as(
-        ctx.db.select({ targetId: notificationTargets.id, }).from(notificationTargets).where(and(
-          eq(notificationTargets.userId, ctx.session.user.id),
-          eq(notificationTargets.id, input.targetId),
-        ))
+      const myTargets = ctx.db.$with("targets").as(
+        ctx.db
+          .select({ targetId: notificationTargets.id })
+          .from(notificationTargets)
+          .where(
+            and(
+              eq(notificationTargets.userId, ctx.session.user.id),
+              eq(notificationTargets.id, input.targetId),
+            ),
+          ),
       );
-      const myGroups = ctx.db.$with('groups').as(
-        ctx.db.select({ groupId: taskGroups.id, }).from(taskGroups).where(and(
-          eq(taskGroups.userId, ctx.session.user.id),
-          eq(taskGroups.id, input.groupId),
-        ))
+      const myGroups = ctx.db.$with("groups").as(
+        ctx.db
+          .select({ groupId: taskGroups.id })
+          .from(taskGroups)
+          .where(
+            and(
+              eq(taskGroups.userId, ctx.session.user.id),
+              eq(taskGroups.id, input.groupId),
+            ),
+          ),
       );
 
-      await ctx.db.with(myTargets, myGroups).insert(subscriptions).values({
-        groupId: sql`${myGroups.groupId}`,
-        targetId: sql`${myTargets.targetId}`,
-      });
+      await ctx.db
+        .with(myTargets, myGroups)
+        .insert(subscriptions)
+        .values({
+          groupId: sql`${myGroups.groupId}`,
+          targetId: sql`${myTargets.targetId}`,
+        });
     }),
-    unsubscribe: protectedProcedure
-      .input(
-        z.object({
-          targetId: validators.targetId,
-          groupId: validators.taskGroupId,
-        }),
-      )
-      .mutation(async ({ ctx, input }) => {
-        const myTargets = ctx.db.$with('targets').as(
-          ctx.db.select({ targetId: notificationTargets.id, }).from(notificationTargets).where(and(
-            eq(notificationTargets.userId, ctx.session.user.id),
-            eq(notificationTargets.id, input.targetId),
-          ))
-        );
-        const myGroups = ctx.db.$with('groups').as(
-          ctx.db.select({ groupId: taskGroups.id, }).from(taskGroups).where(and(
-            eq(taskGroups.userId, ctx.session.user.id),
-            eq(taskGroups.id, input.groupId),
-          ))
-        );
-  
-        await ctx.db.with(myTargets, myGroups).delete(subscriptions).where(and(
-          eq(subscriptions.groupId, sql`${myGroups.groupId}`),
-          eq(subscriptions.targetId, sql`${myTargets.targetId}`),
-        ));
+  unsubscribe: protectedProcedure
+    .input(
+      z.object({
+        targetId: validators.targetId,
+        groupId: validators.taskGroupId,
       }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const myTargets = ctx.db.$with("targets").as(
+        ctx.db
+          .select({ targetId: notificationTargets.id })
+          .from(notificationTargets)
+          .where(
+            and(
+              eq(notificationTargets.userId, ctx.session.user.id),
+              eq(notificationTargets.id, input.targetId),
+            ),
+          ),
+      );
+      const myGroups = ctx.db.$with("groups").as(
+        ctx.db
+          .select({ groupId: taskGroups.id })
+          .from(taskGroups)
+          .where(
+            and(
+              eq(taskGroups.userId, ctx.session.user.id),
+              eq(taskGroups.id, input.groupId),
+            ),
+          ),
+      );
+
+      await ctx.db
+        .with(myTargets, myGroups)
+        .delete(subscriptions)
+        .where(
+          and(
+            eq(subscriptions.groupId, sql`${myGroups.groupId}`),
+            eq(subscriptions.targetId, sql`${myTargets.targetId}`),
+          ),
+        );
+    }),
 });

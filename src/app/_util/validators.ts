@@ -4,14 +4,6 @@ import type { PgColumn } from "drizzle-orm/pg-core";
 import { notificationTargets, recurringTasks, subscriptions, taskGroups } from "~/server/db/schema";
 
 export const validators = {
-  requests: {
-    // https://developer.mozilla.org/en-US/docs/Web/API/PushSubscription
-    pushNotificationSubscription: z.object({
-      endpoint: z.string().min(1),
-      expirationTime: z.number().nullable(),
-      keys: z.record(z.string(), z.string()),
-    }),
-  },
   targetId: idFromColumn(() => notificationTargets.id),
   subscriptionId: idFromColumn(() => subscriptions.id),
   taskGroupId: idFromColumn(() => taskGroups.id),

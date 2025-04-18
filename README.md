@@ -40,8 +40,6 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - tying zod validators to forms
 - Get NavLinks back (current page in site map should have visual indicator)
 - Sign in / sign out widget sprucing up
-- notificationTargets should have names (editable)
-- record UA with subscription, display https://uaparser.dev/
 - show # of groups on profile subscription page, disable delete if nonzero
 - Suggest a feature form (notification types)
 - DaisyUI Status on tasks

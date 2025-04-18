@@ -46,39 +46,45 @@ export const subscriptions = createTable(
     FK_Constraint(table.groupId, taskGroups.id),
   ],
 );
-export const subscriptionRelations = relations(subscriptions, ({one}) => ({
+export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
   target: one(notificationTargets, {
     fields: [subscriptions.targetId],
     references: [notificationTargets.id],
-  })
+  }),
 }));
-
 
 export const notificationTargets = createTable("notificationTargets", (d) => ({
   ...DefaultFields(d, "notificationTargetId"),
   ...UserId(d),
+  title: d.varchar().notNull(),
 }));
 
-export const notificationTargetRelations = relations(notificationTargets, ({many}) => ({
-  configs: many(pushConfigs),
-  subscriptions: many(subscriptions),
-}));
+export const notificationTargetRelations = relations(
+  notificationTargets,
+  ({ many }) => ({
+    configs: many(pushConfigs),
+    subscriptions: many(subscriptions),
+  }),
+);
 
 export const pushConfigs = createTable(
   "pushConfigs",
   (d) => ({
     ...DefaultFields(d, "pushConfigId"),
     targetId: FK(d, () => notificationTargets.id),
+    ua: d.jsonb().$type<UAParser.IResult>().notNull(),
     endpoint: d.varchar().notNull().unique(),
     keys: d.jsonb().$type<Record<string, string>>().notNull(),
   }),
-  (table) => [FK_Constraint(table.targetId, notificationTargets.id).onDelete("cascade")],
+  (table) => [
+    FK_Constraint(table.targetId, notificationTargets.id).onDelete("cascade"),
+  ],
 );
-export const configRelations = relations(pushConfigs, ({one}) => ({
+export const configRelations = relations(pushConfigs, ({ one }) => ({
   target: one(notificationTargets, {
     fields: [pushConfigs.targetId],
     references: [notificationTargets.id],
-  })
+  }),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({

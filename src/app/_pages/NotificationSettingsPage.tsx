@@ -7,6 +7,7 @@ import { env } from "~/env";
 import { usePushNotifications } from "../_util/pushNotifications";
 import { validators } from "../_util/validators";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { pushConfig } from "~/model/pushConfig";
 
 export const NotificationSettingsPage: FC = () => {
   const {
@@ -25,12 +26,12 @@ export const NotificationSettingsPage: FC = () => {
           allTargets.data.map((t) => (
             <li key={t.id} className="list-row">
               <div className="list-col-grow">
-                Browser push notification{" "}
+                Push Notification to {t.title}
                 {t.configs.find(
                   (c) => c.endpoint === browserSubscriptionEndpoint,
                 )
-                  ? "(this browser)"
-                  : ""}{" "}
+                  ? " (this browser)"
+                  : ""}
               </div>
               <button
                 className="btn btn-circle btn-ghost text-error size-5"
@@ -48,11 +49,7 @@ export const NotificationSettingsPage: FC = () => {
             void requestPushNotifications().then(
               (r) =>
                 r &&
-                createPushTarget.mutate(
-                  validators.requests.pushNotificationSubscription.parse(
-                    r.toJSON(),
-                  ),
-                ),
+                createPushTarget.mutate(pushConfig.validator.parse(r.toJSON())),
             );
           }}
         >
