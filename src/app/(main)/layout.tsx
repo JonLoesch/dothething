@@ -32,7 +32,7 @@ export default async function Layout(props: PropsWithChildren) {
                   </div>
                   <div className="[&_a]:btn [&_a]:btn-ghost navbar-center flex flex-row [&_a]:text-xl">
                     <Link href="/my/list">My Stuff</Link>
-                    <Link href="/my/profile">Profile</Link>
+                    <Link href="/my/notification-settings">Notification Settings</Link>
                   </div>
                   <div className="navbar-end flex flex-row">
                     {session?.user ? (

@@ -8,7 +8,7 @@ import { usePushNotifications } from "../_util/pushNotifications";
 import { validators } from "../_util/validators";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
-export const ProfilePage: FC = () => {
+export const NotificationSettingsPage: FC = () => {
   const {
     allTargets,
     createPushTarget,
@@ -19,7 +19,7 @@ export const ProfilePage: FC = () => {
   } = usePushNotifications();
 
   return (
-    <PageLayout title={titles.profile}>
+    <PageLayout title={titles.notificationSettings}>
       <div className="list">
         {allTargets.isSuccess &&
           allTargets.data.map((t) => (

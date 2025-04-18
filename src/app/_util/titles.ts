@@ -1,4 +1,4 @@
 export const titles = {
-    profile: 'Profile',
+    notificationSettings: 'Notification Settings',
     list: 'My Things (to do)',
 }

@@ -43,7 +43,6 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - notificationTargets should have names (editable)
 - record UA with subscription, display https://uaparser.dev/
 - show # of groups on profile subscription page, disable delete if nonzero
-- Rename profile page to notification settings
 - Suggest a feature form (notification types)
 - DaisyUI Status on tasks
 
