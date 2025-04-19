@@ -20,8 +20,8 @@ export function usePushNotifications() {
 
   const [browserData, setBrowserData] = useReducer<
     "pending" | "denied" | { endpoint: string },
-    [PushSubscription | null]
-  >((state, sub: PushSubscription | null | "denied") => {
+    [PushSubscription | null | undefined]
+  >((state, sub: PushSubscription | null | undefined | "denied") => {
     return sub
       ? sub === "denied"
         ? "denied"
@@ -33,10 +33,12 @@ export function usePushNotifications() {
   const existingSubscriptionPromise = useMemo(async () => {
     if (typeof navigator === "undefined") return;
     const registration = await navigator.serviceWorker.register("/sw.js");
-    const existing = await registration.pushManager.getSubscription();
-    setBrowserData(existing);
-    return existing;
+    return await registration.pushManager.getSubscription();
   }, []);
+  useEffect(
+    () => void existingSubscriptionPromise.then(setBrowserData),
+    [existingSubscriptionPromise],
+  );
   const requestPushNotifications = useCallback(async () => {
     if (typeof Notification === "undefined") return;
     // TODO: support older browsers??
