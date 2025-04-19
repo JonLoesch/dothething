@@ -9,7 +9,7 @@ export const PageLayout: FC<
 > = (props) => {
   return (
     <div>
-      <div className="text-primary-content mb-10 text-4xl font-bold">
+      <div className="text-primary-content mb-4 lg:mb-10 text-lg lg:text-4xl font-bold">
         {displayTitle()}
       </div>
       <div className="bg-base-200 flex flex-row rounded p-4 gap-4">

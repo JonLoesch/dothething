@@ -6,14 +6,31 @@
 }
 .navbar {
   @apply px-6 py-4;
+
+  @media (width < 64rem) {
+    @apply p-0 min-h-10;
+  }
   .navbar-start,
   .navbar-center,
   .navbar-end {
-    a:not(.dropdown-content a) {
-      @apply btn-ghost;
-    }
     a {
       @apply btn text-2xl;
+
+      @media (width < 64rem) {
+        @apply text-xl btn-md;
+      }
+    }
+    a:not(.dropdown-content a) {
+      @apply btn-ghost;
+
+      @media (width < 64rem) {
+        @apply text-xl btn-xs;
+      }
+    }
+  }
+  @media (width < 64rem) {
+    .navbar-center {
+      @apply hidden;
     }
   }
 }
