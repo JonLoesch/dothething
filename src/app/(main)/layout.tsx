@@ -27,10 +27,10 @@ export default async function Layout(props: PropsWithChildren) {
             <div>
               <div className="bg-primary pb-48 [&+*]:-mt-48">
                 <div className="navbar relative">
-                  <div className="[&_a]:btn [&_a]:btn-ghost navbar-start flex flex-row [&_a]:text-xl">
+                  <div className="navbar-start flex flex-row">
                     <Link href="/">DoTheThing</Link>
                   </div>
-                  <div className="[&_a]:btn [&_a]:btn-ghost navbar-center flex flex-row [&_a]:text-xl">
+                  <div className="navbar-center flex flex-row">
                     <Link href="/my/list">My Stuff</Link>
                     <Link href="/my/notification-settings">
                       Notification Settings
@@ -38,19 +38,36 @@ export default async function Layout(props: PropsWithChildren) {
                   </div>
                   <div className="navbar-end flex flex-row">
                     {session?.user ? (
-                      <>
-                        You are signed in
-                        <Link href="/api/auth/signout" className="btn">
-                          Sign out
-                        </Link>
-                      </>
+                      <div className="dropdown dropdown-end">
+                        <div
+                          tabIndex={0}
+                          role="button"
+                          className="btn m1 btn-circle size-12"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={session.user.image}
+                            className="rounded-full"
+                          />
+                        </div>
+                        <ul
+                          tabIndex={0}
+                          className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+                        >
+                          <li>
+                            <Link href="/api/auth/signout">
+                              Sign out
+                            </Link>
+                          </li>
+                        </ul>
+                      </div>
                     ) : (
                       <>
                         <Link href="/api/auth/signin">Sign in</Link>
                       </>
                     )}
                   </div>
-                  <div className="border-primary-content/50 absolute inset-x-12 bottom-0 h-0 border-b" />
+                  <div className="border-primary-content/50 absolute inset-x-16 bottom-0 h-0 border-b" />
                 </div>
               </div>
               <div className="p-10">{props.children}</div>

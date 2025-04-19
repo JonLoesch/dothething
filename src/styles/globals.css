@@ -4,3 +4,16 @@
 .bg-primary {
   @apply text-primary-content;
 }
+.navbar {
+  @apply px-6 py-4;
+  .navbar-start,
+  .navbar-center,
+  .navbar-end {
+    a:not(.dropdown-content a) {
+      @apply btn-ghost;
+    }
+    a {
+      @apply btn text-2xl;
+    }
+  }
+}

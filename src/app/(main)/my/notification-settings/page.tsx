@@ -1,5 +1,4 @@
 import { NotificationSettingsPage } from "~/app/_pages/NotificationSettingsPage";
-import { RedirectToSignIn } from "~/app/_pages/RedirectToSignIn";
 import { titles } from "~/app/_util/titles";
 import { auth, requireAuth, signIn } from "~/server/auth";
 import { api } from "~/trpc/server";

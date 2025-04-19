@@ -31,7 +31,6 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 ## TODO
 
 ## TODO Next
-- Fucking fix NextAuth beta bullshit goddamn
 - Mobile friendly
 
 
@@ -45,7 +44,6 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - mailto header on VAPID details
 - show # of groups on profile subscription page, disable delete if nonzero
 - Suggest a feature form (notification types)
-- Sign in / sign out widget sprucing up
 - Get NavLinks back (current page in site map should have visual indicator)
 - immer might be good for useMutation optimistic updates
 - Hosting / Migrations
@@ -53,6 +51,7 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - Test all cases of notification / permissions :(
 - Another notification type
 - use browser icons from uaparser
+- What if no user image
 
 ## Target site layout
 
