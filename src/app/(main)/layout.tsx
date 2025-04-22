@@ -67,7 +67,8 @@ export default async function Layout(props: PropsWithChildren) {
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={session.user.image}
+                              src={session.user.image ?? undefined}
+                              alt="Profile Image"
                               className="rounded-full"
                             />
                           </div>

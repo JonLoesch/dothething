@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { RedirectToSignIn } from "~/app/_pages/RedirectToSignIn";
 import { TaskListPage } from "~/app/_pages/TaskListPage";
 import { titles } from "~/app/_util/titles";
 import { auth, requireAuth, signIn } from "~/server/auth";
