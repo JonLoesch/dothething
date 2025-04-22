@@ -18,26 +18,20 @@ export function usePushNotifications() {
     },
   });
 
-  const [browserData, setBrowserData] = useReducer<
-    "pending" | "denied" | { endpoint: string },
-    [PushSubscription | null | undefined]
-  >((state, sub: PushSubscription | null | undefined | "denied") => {
-    return sub
-      ? sub === "denied"
-        ? "denied"
-        : {
-            endpoint: sub.endpoint,
-          }
-      : state;
-  }, "pending");
-  const existingSubscriptionPromise = useMemo(async () => {
-    if (typeof navigator === "undefined") return;
+  const [subscription, setSubscription] = useState<
+    PushSubscription | "pending" | "denied" | null
+  >("pending");
+  const getCurrentBrowserSubscriptionStatus = useMemo(async () => {
+    if (typeof navigator === "undefined") return null;
     const registration = await navigator.serviceWorker.register("/sw.js");
     return await registration.pushManager.getSubscription();
   }, []);
   useEffect(
-    () => void existingSubscriptionPromise.then(setBrowserData),
-    [existingSubscriptionPromise],
+    () =>
+      void getCurrentBrowserSubscriptionStatus.then((currentBrowserStatus) =>
+        setSubscription((s) => (s === "pending" ? currentBrowserStatus : s)),
+      ),
+    [getCurrentBrowserSubscriptionStatus],
   );
   const requestPushNotifications = useCallback(async () => {
     if (typeof Notification === "undefined") return;
@@ -45,42 +39,50 @@ export function usePushNotifications() {
     // https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API#getting_permission
     const p = await Notification.requestPermission();
     if (p !== "granted") {
+      setSubscription("denied");
       alert(
         "Cannot subscribe to push notifications because you have disabled them in your browser",
       );
       return;
     }
-    const existingSubsccription = await existingSubscriptionPromise;
+    const existingSubsccription = await getCurrentBrowserSubscriptionStatus;
     if (!existingSubsccription) {
       const registration = await navigator.serviceWorker.register("/sw.js");
       const newSubscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
       });
-      setBrowserData(newSubscription);
+      setSubscription(newSubscription);
       return newSubscription;
     }
-  }, [existingSubscriptionPromise]);
+  }, [getCurrentBrowserSubscriptionStatus]);
   const isSubscribed = useMemo(() => {
-    if (typeof browserData === "string") {
-      return browserData;
+    if (subscription === "pending") {
+      return "pending";
+    } else if (subscription === "denied") {
+      return "denied";
     } else if (!allTargets.isSuccess) {
       return "pending";
+    } else if (subscription === null) {
+      return "no";
     } else {
       return allTargets.data.find((x) =>
-        x.configs.find((c) => c.endpoint === browserData.endpoint),
+        x.configs.find((c) => c.endpoint === subscription.endpoint),
       )
         ? "yes"
         : "no";
     }
-  }, [browserData, allTargets]);
+  }, [subscription, allTargets]);
 
   return useMemo(
     () => ({
       requestPushNotifications,
       allTargets,
       createPushTarget,
-      browserData,
+      browserEndpoint:
+        typeof subscription === "string" || subscription === null
+          ? null
+          : subscription.endpoint,
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       isSubscribed: isSubscribed as typeof isSubscribed,
       removeTarget,
@@ -89,7 +91,7 @@ export function usePushNotifications() {
       requestPushNotifications,
       allTargets,
       createPushTarget,
-      browserData,
+      subscription,
       isSubscribed,
       removeTarget,
     ],

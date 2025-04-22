@@ -17,7 +17,7 @@ export const NotificationSettingsPage: FC = () => {
     requestPushNotifications,
     isSubscribed,
     removeTarget,
-    browserData,
+    browserEndpoint,
   } = usePushNotifications();
   const testCron = api.crons.runTestNotifications.useMutation();
 
@@ -31,8 +31,7 @@ export const NotificationSettingsPage: FC = () => {
                 {t.title}
                 {t.configs.find(
                   (c) =>
-                    typeof browserData !== "string" &&
-                    c.endpoint === browserData.endpoint,
+                    c.endpoint === browserEndpoint,
                 )
                   ? " (this browser)"
                   : ""}
