@@ -29,10 +29,11 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
 
 ## TODO
-- Hosting / Migrations
 
 ## TODO Next
 - non-mobile working again :O
+- modal concept in sectioned layout
+- sectioned layout fullscreen width controls
 - delete group
   - show # of lined tasks, subscriptions on donfirm dialog
     - cascade
@@ -59,6 +60,9 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - Another notification type
 - use browser icons from uaparser
 - What if no user image
+- db:push always shows changes
+- db prefix unnecessary
+- prisma?
 
 ## Target site layout
 

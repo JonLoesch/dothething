@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { type Mutation, useMutationState, useQueryClient } from "@tanstack/react-query";
 import {
   useCallback,
   useEffect,
@@ -12,21 +12,27 @@ const toastDurationMS = 5000;
 
 export function ErrorDisplay() {
   const [isMounted, setMounted] = useState(true);
-  useEffect(() => () => setMounted(false), []);
-  const trpcClient = useQueryClient();
-  const mutCache = useMemo(() => trpcClient.getMutationCache(), [trpcClient]);
-  const getFailingMuts = useCallback(
-    () => mutCache.findAll({ status: "error" }),
-    [mutCache],
-  );
-  const [allFailingMutations, triggerRefetch] = useReducer(
-    getFailingMuts,
-    undefined,
-    getFailingMuts,
-  );
-  const [nonce, inc] = useReducer(x => x + 1, 0);
-  useEffect(() => mutCache.subscribe(inc), [mutCache]);
-  useEffect(() => triggerRefetch, [nonce]);
+  // useEffect(() => () => setMounted(false), []);
+  // const trpcClient = useQueryClient();
+  // const mutCache = useMemo(() => trpcClient.getMutationCache(), [trpcClient]);
+  // const getFailingMuts = useCallback(
+  //   () => mutCache.findAll({ status: "error" }),
+  //   [mutCache],
+  // );
+  const allFailingMutations = useMutationState({
+    filters: {
+      status: 'error',
+    },
+    select: m=>m,
+  })
+  // const [allFailingMutations, triggerRefetch] = useReducer(
+  //   getFailingMuts,
+  //   undefined,
+  //   getFailingMuts,
+  // );
+  // const [nonce, inc] = useReducer(x => x + 1, 0);
+  // useEffect(() => mutCache.subscribe(inc), [mutCache]);
+  // useEffect(() => triggerRefetch, [nonce]);
   const seenMutIds = useRef<Set<number>>(new Set());
   const [staleMutIds, addStaleMutId] = useReducer<Set<number>, [number]>(
     (s, a) => new Set([...s, a]),

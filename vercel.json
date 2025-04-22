@@ -1,0 +1,6 @@
+{
+    "crons": [{
+      "path": "/api/trpc/crons.runTestNotifications",
+      "schedule": "*/5 * * * *"
+    }]
+  }

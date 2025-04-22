@@ -1,5 +1,5 @@
 import { compareAsc } from "date-fns";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, ConsoleLogWriter, eq, inArray, sql } from "drizzle-orm";
 import { UAParser } from "ua-parser-js";
 import { z } from "zod";
 import { validators } from "~/app/_util/validators";
@@ -17,10 +17,11 @@ import {
 } from "~/server/db/schema";
 import webpush from "web-push";
 import { env } from "~/env";
+import { TRPCError } from "@trpc/server";
 
 const cronProcedure = publicProcedure.use(({ ctx, next }) => {
-  if (ctx.headers.get("CRON") !== "CRON") {
-    // throw new TRPCError({ code: "UNAUTHORIZED" });
+  if (ctx.headers.get('Authorization') !== `Bearer ${env.CRON_SECRET}`) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({
     ctx: {

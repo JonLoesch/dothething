@@ -15,6 +15,7 @@ export const env = createEnv({
         GOOGLE_CLIENT_SECRET: z.string(),
     DATABASE_URL: z.string().url(),
     VAPID_PRIVATE_KEY: z.string().trim().min(1),
+    CRON_SECRET: z.string().trim().min(1),
     NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),
@@ -40,6 +41,7 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
+    CRON_SECRET: process.env.CRON_SECRET,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**
