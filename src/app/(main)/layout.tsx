@@ -20,6 +20,7 @@ import {
   MenuItem,
   MenuItems,
 } from "@headlessui/react";
+import { titles } from "../_util/titles";
 
 export const metadata: Metadata = {
   title: "DoTheThing",
@@ -48,9 +49,9 @@ export default async function Layout(props: PropsWithChildren) {
                   <div className="navbar-center flex flex-row max-lg:hidden">
                     {session?.user && (
                       <>
-                        <Link href="/my/list">My Stuff</Link>
+                        <Link href="/my/list">{titles.list}</Link>
                         <Link href="/my/notification-settings">
-                          Notification Settings
+                          {titles.notificationSettings}
                         </Link>
                       </>
                     )}
@@ -98,10 +99,8 @@ export default async function Layout(props: PropsWithChildren) {
                     {session?.user && (
                       <>
                         <li>
-                          <CloseButton
-                            as={Link}
-                            href="/my/list"
-                          >My Stuff
+                          <CloseButton as={Link} href="/my/list">
+                            {titles.list}
                           </CloseButton>
                         </li>
                         <li>
@@ -109,7 +108,7 @@ export default async function Layout(props: PropsWithChildren) {
                             as={Link}
                             href="/my/notification-settings"
                           >
-                            Notification Settings
+                            {titles.notificationSettings}
                           </CloseButton>
                         </li>
                       </>

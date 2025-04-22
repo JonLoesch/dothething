@@ -1,5 +1,12 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: corporate --default, night --prefersdark;
+}
+@layer theme {
+  .bg-base-200 .btn {
+    @apply btn-secondary;
+  }
+}
 
 .bg-primary {
   @apply text-primary-content;

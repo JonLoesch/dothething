@@ -31,7 +31,13 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 ## TODO
 
 ## TODO Next
-- Mobile friendly
+- non-mobile working again :O
+- delete group
+  - show # of lined tasks, subscriptions on donfirm dialog
+    - cascade
+- optimistic updates factored out
+  - Progress spinner
+  - Smoother Display of API errors
 
 
 - DaisyUI Status on tasks
