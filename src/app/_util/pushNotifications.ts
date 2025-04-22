@@ -22,7 +22,6 @@ export function usePushNotifications() {
     PushSubscription | "pending" | "denied" | null
   >("pending");
   const getCurrentBrowserSubscriptionStatus = useMemo(async () => {
-    console.log('navigator', navigator);
     if (typeof navigator === "undefined" || typeof navigator.serviceWorker === "undefined") return null;
     const registration = await navigator.serviceWorker.register("/sw.js");
     return await registration.pushManager.getSubscription();
@@ -35,7 +34,6 @@ export function usePushNotifications() {
     [getCurrentBrowserSubscriptionStatus],
   );
   const requestPushNotifications = useCallback(async () => {
-    console.log('Notification', Notification);
     if (typeof Notification === "undefined") return;
     // TODO: support older browsers??
     // https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API#getting_permission
