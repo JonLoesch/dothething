@@ -102,7 +102,7 @@ export const notificationRouter = createTRPCRouter({
       //   .select(
       //     ctx.db
       //     .select({
-      //         id: sql<number>`nextval('"dothething_subscriptions_subscriptionId_seq"'::regclass)`.as('id'),
+      //         id: sql<number>`nextval('"dothethang_subscriptions_subscriptionId_seq"'::regclass)`.as('id'),
       //         createdAt: sql`now()`.as('createdAt'),
       //         updatedAt: sql`now()`.as('updatedAt'),
       //         deletedAt: sql`null`.as('deletedAt'),

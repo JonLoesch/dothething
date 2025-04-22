@@ -23,7 +23,7 @@ import {
 import { titles } from "../_util/titles";
 
 export const metadata: Metadata = {
-  title: "DoTheThing",
+  title: "DoTheThang",
   description: "A simple reminder application",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
@@ -44,7 +44,7 @@ export default async function Layout(props: PropsWithChildren) {
               <div className="bg-primary pb-48 [&+*]:-mt-48">
                 <div className="navbar relative">
                   <div className="navbar-start flex flex-row">
-                    <Link href="/">DoTheThing</Link>
+                    <Link href="/">DoTheThang</Link>
                   </div>
                   <div className="navbar-center flex flex-row max-lg:hidden">
                     {session?.user && (

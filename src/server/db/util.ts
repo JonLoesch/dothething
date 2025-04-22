@@ -12,7 +12,7 @@ import type { z } from "zod";
  */
 
 export const createTable = pgTableCreator(
-  (name: string) => `dothething_${snakify(name, true)}`,
+  (name: string) => `dothethang_${snakify(name, true)}`,
 );
 
 function PrimaryKey<T extends string>(d: PGSchemaBuilder, idName: T) {

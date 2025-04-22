@@ -76,3 +76,9 @@ Modals?
   - Edit / add notification vector GUI
   - Edit / add recurring task
 
+
+
+## Helpful snippets:
+
+- Migrate production:
+`env "$(sed -n 's/^PRODUCTION_FOR_MIGRATING_MANUALLY_//p' .env)" pnpm db:push`

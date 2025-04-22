@@ -1,4 +1,4 @@
 export const titles = {
     notificationSettings: 'Notification Settings',
-    list: 'My Things',
+    list: 'My Thangs',
 }
