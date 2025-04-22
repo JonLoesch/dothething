@@ -29,6 +29,7 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
 
 ## TODO
+- Hosting / Migrations
 
 ## TODO Next
 - non-mobile working again :O
@@ -47,12 +48,12 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - tying zod validators to forms
 - 
 ## TODO Later
+- react fragment navigation
 - mailto header on VAPID details
 - show # of groups on profile subscription page, disable delete if nonzero
 - Suggest a feature form (notification types)
 - Get NavLinks back (current page in site map should have visual indicator)
 - immer might be good for useMutation optimistic updates
-- Hosting / Migrations
 - Notifications UI - service worker caching??
 - Test all cases of notification / permissions :(
 - Another notification type
