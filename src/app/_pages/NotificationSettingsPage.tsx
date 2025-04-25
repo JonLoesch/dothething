@@ -6,9 +6,9 @@ import { titles } from "../_util/titles";
 import { env } from "~/env";
 import { usePushNotifications } from "../_util/pushNotifications";
 import { validators } from "../_util/validators";
-import { TrashIcon } from "@heroicons/react/24/outline";
 import { pushConfig } from "~/model/pushConfig";
 import { api } from "~/trpc/react";
+import { Icon } from "../_components/icons";
 
 export const NotificationSettingsPage: FC = () => {
   const {
@@ -40,7 +40,7 @@ export const NotificationSettingsPage: FC = () => {
                 className="btn btn-circle btn-ghost text-error size-5"
                 onClick={() => removeTarget.mutate(t)}
               >
-                <TrashIcon />
+                <Icon.Trash />
               </button>
             </li>
           ))}

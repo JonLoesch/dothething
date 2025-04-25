@@ -93,20 +93,18 @@ function Labelled(
   );
 }
 
-function TextField(props: {
+function TextField({field, type, ...rest}: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   field: FieldMetadata<string, any, string[]>;
-  placeholder?: HTMLInputElement["placeholder"];
+  // placeholder?: HTMLInputElement["placeholder"];
   type?: "text" | "number";
-  initialValue: string;
-}) {
+} & Pick<InputHTMLAttributes<unknown>, 'placeholder' | 'autoFocus' | 'defaultValue'>) {
   return (
     <input
-      {...getInputProps(props.field, { type: props.type ?? "text" })}
+      {...getInputProps(field, { type: type ?? "text" })}
       className="input h-10 focus:outline-0"
-      placeholder={props.placeholder}
-      aria-placeholder={props.placeholder}
-      defaultValue={props.initialValue}
+      aria-placeholder={rest.placeholder}
+      {...rest}
     />
   );
 }
@@ -156,10 +154,12 @@ function Button(props: { label: string; onClick?: () => void }) {
 }
 function ButtonGroup(props: PropsWithChildren) {
   return (
-    <div className="join join-vertical [&_.btn]:join-item w-full gap-4">
-      <div className="mx-4 border-b pt-4" />
-      {props.children}
-    </div>
+    <>
+      <div className="divider" />
+      <div className="join join-vertical [&_.btn]:join-item w-full max-w-72 gap-4 self-end">
+        {props.children}
+      </div>
+    </>
   );
 }
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { UserIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useState, type FC } from "react";
+import { Icon } from "./icons";
 
 export const ProfilePic: FC<{ src?: string }> = (props) => {
   const [altVisible, setAltVisible] = useState(props.src === undefined);
@@ -20,7 +20,7 @@ export const ProfilePic: FC<{ src?: string }> = (props) => {
           }}
         />
       )}
-      <UserIcon className={altVisible ? "block" : "hidden"} />
+      <Icon.Anonymous className={altVisible ? "block" : "hidden"} />
     </>
   );
 };

@@ -1,21 +1,15 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: corporate --default, night --prefersdark;
+  themes:
+    corporate --default,
+    night --prefersdark;
 }
-@layer theme {
-  .bg-base-200 .btn {
-    @apply btn-secondary;
-  }
-}
-
-.bg-primary {
-  @apply text-primary-content;
-}
-.navbar {
+@plugin "tailwindcss-react-aria-components";
+@utility navbar {
   @apply px-6 py-4;
 
   @media (width < 64rem) {
-    @apply p-0 min-h-10;
+    @apply min-h-10 p-0;
   }
   .navbar-start,
   .navbar-center,
@@ -24,14 +18,14 @@
       @apply btn text-2xl;
 
       @media (width < 64rem) {
-        @apply text-xl btn-md;
+        @apply btn-md text-xl;
       }
     }
     a:not(.dropdown-content a) {
       @apply btn-ghost;
 
       @media (width < 64rem) {
-        @apply text-xl btn-xs;
+        @apply btn-xs text-xl;
       }
     }
   }
@@ -39,5 +33,68 @@
     .navbar-center {
       @apply hidden;
     }
+  }
+}
+
+@layer components {
+  .bg-base-200 .btn {
+    @apply btn-secondary;
+  }
+  .infobox {
+    @apply rounded-lg border-2 border-dashed p-4;
+    border-color: color-mix(in srgb, black 20%, transparent);
+  }
+
+  .bg-primary {
+    @apply text-primary-content;
+  }
+
+  .react-aria-ModalOverlay {
+    @apply fixed top-0 left-0 z-50 flex flex-row h-[var(--visual-viewport-height)] w-[100vw] items-center justify-center bg-black/50 p-2;
+
+    &[data-entering] {
+      animation: modal-fade 200ms;
+    }
+
+    &[data-exiting] {
+      animation: modal-fade 150ms reverse ease-in;
+    }
+  }
+
+  .react-aria-Modal {
+    @apply bg-base-200 rounded-xl p-8 grow max-w-3xl;
+    .btn {
+      @apply btn-secondary;
+    }
+
+    &[data-entering] {
+      animation: modal-zoom 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+  }
+
+  @keyframes modal-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes modal-zoom {
+    from {
+      transform: scale(0.8);
+    }
+
+    to {
+      transform: scale(1);
+    }
+  }
+}
+
+@layer base {
+  p {
+    @apply m-2;
   }
 }

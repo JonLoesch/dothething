@@ -9,7 +9,6 @@ import { HydrateClient } from "~/trpc/server";
 import { auth } from "~/server/auth";
 import { type PropsWithChildren } from "react";
 import type { Metadata } from "next";
-import { Bars3Icon, UserIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   CloseButton,
   Disclosure,
@@ -22,6 +21,7 @@ import {
 } from "@headlessui/react";
 import { titles } from "../_util/titles";
 import { ProfilePic } from "../_components/ProfilePic";
+import { Icon } from "../_components/icons";
 
 export const metadata: Metadata = {
   title: "DoTheThang",
@@ -84,8 +84,8 @@ export default async function Layout(props: PropsWithChildren) {
                       )}
                     </div>
                     <DisclosureButton className="group pr-2 pl-6 lg:hidden">
-                      <Bars3Icon className="size-8 group-data-[open]:hidden" />
-                      <XMarkIcon className="size-8 not-group-data-[open]:hidden" />
+                      <Icon.Hamburger className="size-8 group-data-[open]:hidden" />
+                      <Icon.XMark className="size-8 not-group-data-[open]:hidden" />
                     </DisclosureButton>
                   </div>
                   <div className="border-primary-content/50 absolute inset-x-16 -bottom-2 border-b" />

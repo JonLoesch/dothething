@@ -1,6 +1,18 @@
 "use client";
 
 import {
+  Button,
+  Dialog,
+  DialogTrigger,
+  Heading,
+  Input,
+  Label,
+  Modal,
+  ModalOverlay,
+  TextField,
+  type ModalRenderProps,
+} from "react-aria-components";
+import {
   Fragment,
   useMemo,
   useReducer,
@@ -20,7 +32,6 @@ import {
 import { _brand } from "../_util/brandId";
 import type { TaskGroupId, TaskId } from "../_util/validators";
 import { z } from "zod";
-import { ChevronDoubleRightIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { titles } from "../_util/titles";
 import { Disclosure } from "@headlessui/react";
 import { type taskRouter } from "~/server/api/routers/task";
@@ -28,6 +39,9 @@ import { useWatchState } from "../_util/useWatchState";
 import { Forms, useConform } from "../_components/Forms";
 import { getFormProps } from "@conform-to/react";
 import { useSelectId } from "../_util/useSelectState";
+import { Icon } from "../_components/icons";
+import { EmptyListDisplay, Explain } from "../_components/utilities";
+import type { UseMutationResult } from "@tanstack/react-query";
 
 type Group = Awaited<ReturnType<typeof taskRouter.allGroups>>[0];
 type Task = Group["tasks"][0];
@@ -53,13 +67,7 @@ export const TaskListPage: FC = () => {
     },
   });
   const [state, setState] = useState<
-    | null
-    | "addGroup"
-    | "deleteGroup"
-    | "editGroup"
-    | "addTask"
-    | "editTask"
-    | "deleteTask"
+    null | "deleteGroup" | "editGroup" | "addTask" | "editTask" | "deleteTask"
   >(null);
 
   return (
@@ -71,15 +79,8 @@ export const TaskListPage: FC = () => {
           params: allGroups.isSuccess && {
             groups: allGroups.data,
             selectGroup,
-            addGroup: () => setState("addGroup"),
           },
           close: () => undefined,
-        }),
-        layoutSection({
-          Component: AddGroup,
-          params: state === "addGroup",
-          close: () => setState(null),
-          title: "New Task Group",
         }),
         layoutSection({
           Component: ViewGroup,
@@ -89,16 +90,9 @@ export const TaskListPage: FC = () => {
                 ...selectedGroup,
                 selectTask,
                 addTask: () => setState("addTask"),
-                delete: () => setState("deleteGroup"),
               }
             : null,
           close: () => selectGroup(null),
-        }),
-        layoutSection({
-          Component: DeleteGroup,
-          title: "Delete",
-          params: state === "deleteGroup" && selectedGroup,
-          close: () => setState(null),
         }),
         layoutSection({
           Component: AddTask,
@@ -113,7 +107,7 @@ export const TaskListPage: FC = () => {
             ? {
                 ...selectedTask,
                 openEdit: () => setState("editTask"),
-                delete: () => setState('deleteTask'),
+                delete: () => setState("deleteTask"),
               }
             : null,
           close: () => selectTask(null),
@@ -121,17 +115,23 @@ export const TaskListPage: FC = () => {
         layoutSection({
           Component: EditTask,
           title: "Edit",
-          params: state === "editTask" && selectedTask ? {
-            ...selectedTask,
-          } : null,
+          params:
+            state === "editTask" && selectedTask
+              ? {
+                  ...selectedTask,
+                }
+              : null,
           close: () => setState(null),
         }),
         layoutSection({
           Component: DeleteTask,
           title: "Edit",
-          params: state === "deleteTask" && selectedTask ? {
-            ...selectedTask,
-          } : null,
+          params:
+            state === "deleteTask" && selectedTask
+              ? {
+                  ...selectedTask,
+                }
+              : null,
           close: () => setState(null),
         }),
       ]}
@@ -143,7 +143,6 @@ const ViewGroups: FC<
   PropsWithSectionHooks<{
     groups: Group[];
     selectGroup: (g: TaskGroupId) => void;
-    addGroup: () => void;
   }>
 > = (props) => {
   return (
@@ -161,14 +160,19 @@ const ViewGroups: FC<
           </a>
         ))}
       </div>
-      <button className="btn" onClick={props.addGroup}>
-        Create New Group
-      </button>
+      <EmptyListDisplay items={props.groups}>
+        You do not have any groups created yet. Please create a group below to
+        get started.
+      </EmptyListDisplay>
+      <DialogTrigger>
+        <Button className="btn">Create New Group</Button>
+        <Modal isDismissable>{(m) => <AddGroupModal {...m} />}</Modal>
+      </DialogTrigger>
     </div>
   );
 };
 
-const AddGroup: FC<PropsWithSectionHooks> = (props) => {
+const AddGroupModal: FC<ModalRenderProps> = (props) => {
   const utils = api.useUtils();
   const addGroup = api.task.addGroup.useMutation({
     async onMutate(variables) {
@@ -197,7 +201,7 @@ const AddGroup: FC<PropsWithSectionHooks> = (props) => {
     onSettled(_data, _error, _variables, _context) {
       void utils.task.allGroups.invalidate();
     },
-    onSuccess: props.close,
+    onSuccess: () => props.state.close(),
   });
   const { form, fields, errorDisplay } = useConform(
     useMemo(
@@ -211,20 +215,32 @@ const AddGroup: FC<PropsWithSectionHooks> = (props) => {
   );
 
   return (
-    <form {...getFormProps(form)}>
+    <form {...getFormProps(form)} className="flex flex-col">
+      <Explain short="New task group" className='pb-6'>
+        <p>
+          You can give different groups different notification settings, for
+          example to have aggresive text notifications for watering the plants,
+          but being more chill about notifications for things like changing the
+          oil in your car.
+        </p>
+        <p>
+          If you&apos;re not sure what to do, just create a single group and add all
+          the tasks into it. You can always move them around later
+        </p>
+      </Explain>
       <Forms.Labelled label="Title" fields={[fields.title]}>
-        <Forms.TextField field={fields.title} initialValue="" />
+        <Forms.TextField field={fields.title} />
       </Forms.Labelled>
       <Forms.ButtonGroup>
         <Forms.SubmitButton label="Create new Group" />
-        <Forms.Button label="Cancel" onClick={props.close} />
+        <Forms.Button label="Cancel" onClick={() => props.state.close()} />
       </Forms.ButtonGroup>
       {errorDisplay}
     </form>
   );
 };
 
-const DeleteGroup: FC<PropsWithSectionHooks<Group>> = (group) => {
+const DeleteGroupModal: FC<ModalRenderProps & Group> = (props) => {
   const utils = api.useUtils();
   const removeGroup = api.task.removeGroup.useMutation({
     async onMutate(variables) {
@@ -242,15 +258,15 @@ const DeleteGroup: FC<PropsWithSectionHooks<Group>> = (group) => {
     // },
     async onSuccess() {
       await utils.task.allGroups.invalidate();
-      group.close();
+      props.state.close();
     },
   });
   return (
     <Forms.ConfirmDelete
-      {...useConform(z.object({}), () => removeGroup.mutate(group))}
-      close={group.close}
+      {...useConform(z.object({}), () => removeGroup.mutate(props))}
+      close={() => props.state.close()}
     >
-      {`Are you sure you want to delete the group "${group.title}"`}
+      {`Are you sure you want to delete the group "${props.title}"`}
     </Forms.ConfirmDelete>
   );
 };
@@ -260,7 +276,6 @@ const ViewGroup: FC<
     Group & {
       selectTask: (task: TaskId) => void;
       addTask: () => void;
-      delete: () => void;
     }
   >
 > = (group) => {
@@ -319,7 +334,7 @@ const ViewGroup: FC<
                     });
                   }}
                 >
-                  <TrashIcon />
+                  <Icon.Trash />
                 </td>
               </tr>
               <tr className="p-4 max-lg:hidden">
@@ -337,30 +352,32 @@ const ViewGroup: FC<
           Add new task{" "}
         </button>
 
-        <button className="btn" onClick={group.delete}>
-          <TrashIcon className="h-full" />
-          Delete group
-        </button>
+
+
+      <DialogTrigger>
+        <Button className="btn btn-error btn-outline">
+        Delete group</Button>
+        <Modal isDismissable>{(m) => <DeleteGroupModal {...m} {...group} />}</Modal>
+      </DialogTrigger>
       </Forms.ButtonGroup>
     </div>
   );
 };
-const ViewTask: FC<PropsWithSectionHooks<Task & { openEdit: () => void, delete: () => void }>> = (
-  task,
-) => {
+const ViewTask: FC<
+  PropsWithSectionHooks<Task & { openEdit: () => void; delete: () => void }>
+> = (task) => {
   return (
     <>
       This task should be completed: {displaySchedule(task.schedule)}
       <Forms.ButtonGroup>
-      <button className="btn" onClick={task.openEdit}>
-        Edit
-      </button>
+        <button className="btn" onClick={task.openEdit}>
+          Edit
+        </button>
         <button className="btn" onClick={task.delete}>
-          <TrashIcon className="h-full" />
+          <Icon.Trash className="h-full" />
           Delete task
         </button>
       </Forms.ButtonGroup>
-      
     </>
   );
 };
@@ -487,7 +504,7 @@ function TaskForm(props: {
       <Forms.Labelled label="Title" fields={[fields.title]}>
         <Forms.TextField
           field={fields.title}
-          initialValue={props.initialValues.title}
+          defaultValue={props.initialValues.title}
         />
       </Forms.Labelled>
       <Forms.Labelled
@@ -497,7 +514,7 @@ function TaskForm(props: {
         <div className="join join-vertical">
           <Forms.TextField
             field={fields.frequency}
-            initialValue={props.initialValues.frequency}
+            defaultValue={props.initialValues.frequency}
             placeholder="Input a number"
             type="number"
           />

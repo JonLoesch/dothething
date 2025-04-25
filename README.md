@@ -60,6 +60,7 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
   - after fade out, should still be able to pull up via corner widget or something
 
 ## TODO cleanup
+- nix headlessUI?
 - Look into zod branding
 - react fragment navigation
 - mailto header on VAPID details
@@ -70,6 +71,10 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - db prefix unnecessary
 - prisma?
 - Look into [atlas](https://atlasgo.io/docs)
+- RAC transition logic is in globals.css, can it be Tailwinded?
+
+## Other
+- Idea for linting that imports follow some declarative structure (i.e. don't import RAC from higher level code)
 
 ## Target site layout
 
