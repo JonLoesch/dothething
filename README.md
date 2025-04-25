@@ -28,41 +28,49 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
 
-## TODO
-
 ## TODO Next
-- non-mobile working again :O
-- modal concept in sectioned layout
-- sectioned layout fullscreen width controls
-- delete group
-  - show # of lined tasks, subscriptions on donfirm dialog
-    - cascade
-- optimistic updates factored out
-  - Progress spinner
-  - Smoother Display of API errors
+- sectioned layout
+  - modal concept
+  - react-aria?
+  - fullscreen width controls
+- User stories in both mobile and fullscreen:
+  - Create tasks / groups
+  - Delete tasks / groups
+    - show # of lined tasks, subscriptions on confirm dialog / cascade
+  - Edit tasks / groups
+  - Mark task as complete
+  - Set/edit notification schedule
+  - Subscribe/unsubscribe to push notiications
+    - show # of groups on profile subscription page, disable delete if nonzero
+- [DaisyUI Status](https://daisyui.com/components/status/) on tasks
 
-
-- DaisyUI Status on tasks
-- Remove silly @title route pattern
-- toDateString shouldn't be littered (centralize in DB adapter)
-- Look into zod branding
-- tying zod validators to forms
-- 
+ 
 ## TODO Later
+- toDateString shouldn't be littered (centralize in DB adapter)
+- User stories in both mobile and fullscreen:
+  - Manually set next reminder date
+  - Suggest a feature
+- User stories in both mobile and fullscreen:
+- Splash / marketing page
+- optimistic updates factored out
+  - immer might be good for useMutation optimistic updates
+- Smoother Display of API errors
+  - fade in / out
+  - dismiss functionality
+  - after fade out, should still be able to pull up via corner widget or something
+
+## TODO cleanup
+- Look into zod branding
 - react fragment navigation
 - mailto header on VAPID details
-- show # of groups on profile subscription page, disable delete if nonzero
-- Suggest a feature form (notification types)
 - Get NavLinks back (current page in site map should have visual indicator)
-- immer might be good for useMutation optimistic updates
 - Notifications UI - service worker caching??
 - Test all cases of notification / permissions :(
-- Another notification type
 - use browser icons from uaparser
 - What if no user image
-- db:push always shows changes
 - db prefix unnecessary
 - prisma?
+- Look into [atlas](https://atlasgo.io/docs)
 
 ## Target site layout
 
