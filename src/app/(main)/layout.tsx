@@ -7,9 +7,9 @@ import "~/styles/globals.css";
 import Link from "next/link";
 import { HydrateClient } from "~/trpc/server";
 import { auth } from "~/server/auth";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 import type { Metadata } from "next";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, UserIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   CloseButton,
   Disclosure,
@@ -21,6 +21,7 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { titles } from "../_util/titles";
+import { ProfilePic } from "../_components/ProfilePic";
 
 export const metadata: Metadata = {
   title: "DoTheThang",
@@ -65,12 +66,7 @@ export default async function Layout(props: PropsWithChildren) {
                             role="button"
                             className="btn m1 btn-circle size-12"
                           >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={session.user.image ?? undefined}
-                              alt="Profile Image"
-                              className="rounded-full"
-                            />
+                            <ProfilePic src={session.user.image ?? undefined} />
                           </div>
                           <ul
                             tabIndex={0}

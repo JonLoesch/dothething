@@ -67,7 +67,6 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - Notifications UI - service worker caching??
 - Test all cases of notification / permissions :(
 - use browser icons from uaparser
-- What if no user image
 - db prefix unnecessary
 - prisma?
 - Look into [atlas](https://atlasgo.io/docs)
