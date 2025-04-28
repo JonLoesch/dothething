@@ -30,8 +30,6 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 
 ## TODO Next
 - sectioned layout
-  - modal concept
-  - react-aria?
   - fullscreen width controls
 - User stories in both mobile and fullscreen:
   - Create tasks / groups

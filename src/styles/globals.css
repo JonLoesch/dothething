@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @plugin "daisyui" {
   themes:
-    corporate --default,
+    fantasy --default,
     night --prefersdark;
 }
 @plugin "tailwindcss-react-aria-components";
@@ -38,16 +38,21 @@
 }
 
 @layer components {
+  .bg-primary {
+    @apply text-primary-content;
+  }
+  .bg-info {
+    @apply text-info-content;
+  }
+}
+
+@layer components {
   .bg-base-200 .btn {
     @apply btn-secondary;
   }
   .infobox {
     @apply rounded-lg border-2 border-dashed p-4;
     border-color: color-mix(in srgb, black 20%, transparent);
-  }
-
-  .bg-primary {
-    @apply text-primary-content;
   }
 
   .react-aria-ModalOverlay {

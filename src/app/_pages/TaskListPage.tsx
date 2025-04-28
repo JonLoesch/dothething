@@ -4,12 +4,15 @@ import {
   Button,
   Dialog,
   DialogTrigger,
+  GridList,
+  GridListItem,
   Heading,
   Input,
   Label,
   Modal,
   ModalOverlay,
   TextField,
+  type GridListProps,
   type ModalRenderProps,
 } from "react-aria-components";
 import {
@@ -41,6 +44,8 @@ import { useSelectId } from "../_util/useSelectState";
 import { Icon } from "../_components/icons";
 import { EmptyListDisplay, Explain } from "../_components/utilities";
 import type { UseMutationResult } from "@tanstack/react-query";
+import pluralize from "pluralize";
+import { groupCollapsed } from "console";
 
 type Group = Awaited<ReturnType<typeof taskRouter.allGroups>>[0];
 type Task = Group["tasks"][0];
@@ -77,6 +82,7 @@ export const TaskListPage: FC = () => {
           title: titles.list,
           params: allGroups.isSuccess && {
             groups: allGroups.data,
+            selectedGroup,
             selectGroup,
           },
           close: () => undefined,
@@ -138,37 +144,62 @@ export const TaskListPage: FC = () => {
   );
 };
 
+interface GroupIdSet extends Set<number> {
+  currentKey: TaskGroupId,
+}
+
+function gridlistSelectionProps<T extends {id: number}>(items: T[], selected: T | null, select: (id: T['id'] | null) => void) {
+  return {
+    items,
+    selectionMode: 'single',
+    selectionBehavior: 'replace',
+    selectedKeys: selected ? [selected.id] : [],
+    onSelectionChange(keys) {
+      if (keys instanceof Set) {
+        if (keys.size === 1 && 'currentKey' in keys && typeof keys.currentKey === 'number') {
+          select(keys.currentKey);
+        }
+      }
+    },
+  } satisfies GridListProps<T>;
+}
+
 const ViewGroups: FC<
   PropsWithSectionHooks<{
     groups: Group[];
-    selectGroup: (g: TaskGroupId) => void;
+    selectedGroup: Group | null;
+    selectGroup: (g: TaskGroupId | null) => void;
   }>
 > = (props) => {
   return (
     <div className="flex flex-col">
-      <div role="tablist" className="tabs flex flex-col items-start">
-        {props.groups.map((group) => (
-          <a
-            role="tab"
-            className="tab self-start p-0 text-ellipsis"
-            // aria-selected={group.id === selectedGroup?.id}
-            key={group.id}
-            onClick={() => props.selectGroup(group.id)}
-          >
-            {group.title}
-          </a>
-        ))}
-      </div>
+      <GridList
+        aria-label="Your existing task groups"
+        {...gridlistSelectionProps(props.groups, props.selectedGroup, props.selectGroup)}
+      >
+        {(group) => (
+          <GridListItem textValue={group.title} className='selected:bg-black'>
+            <span className="link link-secondary">{group.title}</span> (
+            {group.tasks.length == 0
+              ? "empty"
+              : pluralize("task", group.tasks.length, true)}
+            ){/* </Button> */}
+          </GridListItem>
+        )}
+      </GridList>
       <EmptyListDisplay items={props.groups}>
         You do not have any groups created yet. Please create a group below to
         get started.
       </EmptyListDisplay>
+      <div className="divider" />
       <DialogTrigger>
         <Button className="btn">Create New Group</Button>
-        <Modal isDismissable>{(m) => {
-          console.log(m);
-          return <AddGroupModal {...m} />;
-        }}</Modal>
+        <Modal isDismissable>
+          {(m) => {
+            console.log(m);
+            return <AddGroupModal {...m} />;
+          }}
+        </Modal>
       </DialogTrigger>
     </div>
   );
@@ -218,7 +249,7 @@ const AddGroupModal: FC<ModalRenderProps> = (props) => {
 
   return (
     <form {...getFormProps(form)} className="flex flex-col">
-      <Explain short="New task group" className='pb-6'>
+      <Explain short="New task group" className="pb-6">
         <p>
           You can give different groups different notification settings, for
           example to have aggresive text notifications for watering the plants,
@@ -226,8 +257,8 @@ const AddGroupModal: FC<ModalRenderProps> = (props) => {
           oil in your car.
         </p>
         <p>
-          If you&apos;re not sure what to do, just create a single group and add all
-          the tasks into it. You can always move them around later
+          If you&apos;re not sure what to do, just create a single group and add
+          all the tasks into it. You can always move them around later
         </p>
       </Explain>
       <Forms.Labelled label="Title" fields={[fields.title]}>
@@ -354,13 +385,12 @@ const ViewGroup: FC<
           Add new task{" "}
         </button>
 
-
-
-      <DialogTrigger>
-        <Button className="btn btn-error btn-outline">
-        Delete group</Button>
-        <Modal isDismissable>{(m) => <DeleteGroupModal {...m} {...group} />}</Modal>
-      </DialogTrigger>
+        <DialogTrigger>
+          <Button className="btn btn-error btn-outline">Delete group</Button>
+          <Modal isDismissable>
+            {(m) => <DeleteGroupModal {...m} {...group} />}
+          </Modal>
+        </DialogTrigger>
       </Forms.ButtonGroup>
     </div>
   );

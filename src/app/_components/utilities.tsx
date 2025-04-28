@@ -1,9 +1,13 @@
 import type { FC, PropsWithChildren } from "react";
 import {
   Button,
+  DialogTrigger,
   Disclosure,
   DisclosurePanel,
   Heading,
+  Popover,
+  Tooltip,
+  TooltipTrigger,
   type DisclosureProps,
 } from "react-aria-components";
 import { Icon } from "./icons";
@@ -12,26 +16,13 @@ export const Explain: FC<
   PropsWithChildren<{ short: string }> & DisclosureProps
 > = (props) => {
   return (
-    <Disclosure {...props}>
-      {(disclosure) => (
-        <>
-          <Heading>
-            <Button
-              slot="trigger"
-              className="flex w-full flex-row items-center justify-between"
-            >
-              {props.short}
-              <div className="link shrink-0 text-xs">
-                {disclosure.isExpanded ? "less..." : "more..."}
-              </div>
-            </Button>
-          </Heading>
-          <DisclosurePanel className="infobox text-sm aria-hidden:hidden mt-4">
-            {props.children}
-          </DisclosurePanel>
-        </>
-      )}
-    </Disclosure>
+    <div className="flex w-full flex-row items-center justify-between">
+      {props.short}
+      <DialogTrigger>
+        <Button className="link shrink-0 text-xs">more...</Button>
+        <Popover className="infobox mr-3 text-sm bg-info">{props.children}</Popover>
+      </DialogTrigger>
+    </div>
   );
 };
 
@@ -40,7 +31,7 @@ export function EmptyListDisplay(
 ) {
   return (
     <div
-      className="rounded-2 m-4 flex flex-col infobox data-[show=false]:hidden items-center"
+      className="rounded-2 infobox m-4 flex flex-col items-center data-[show=false]:hidden"
       data-show={props.items.length === 0}
     >
       <Icon.EmptyMarker className="my-5 h-10 opacity-40" />
