@@ -1,4 +1,3 @@
-import type { Props } from "node_modules/@headlessui/react/dist/types";
 import {
   useCallback,
   useEffect,

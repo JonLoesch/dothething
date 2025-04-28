@@ -33,7 +33,6 @@ import { _brand } from "../_util/brandId";
 import type { TaskGroupId, TaskId } from "../_util/validators";
 import { z } from "zod";
 import { titles } from "../_util/titles";
-import { Disclosure } from "@headlessui/react";
 import { type taskRouter } from "~/server/api/routers/task";
 import { useWatchState } from "../_util/useWatchState";
 import { Forms, useConform } from "../_components/Forms";
@@ -166,7 +165,10 @@ const ViewGroups: FC<
       </EmptyListDisplay>
       <DialogTrigger>
         <Button className="btn">Create New Group</Button>
-        <Modal isDismissable>{(m) => <AddGroupModal {...m} />}</Modal>
+        <Modal isDismissable>{(m) => {
+          console.log(m);
+          return <AddGroupModal {...m} />;
+        }}</Modal>
       </DialogTrigger>
     </div>
   );
