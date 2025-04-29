@@ -5,12 +5,23 @@ import { Explain } from "~/app/_fragments/Explain";
 import type { TargetId, TaskGroupId } from "~/app/_util/validators";
 import { api } from "~/trpc/react";
 import type { Target } from "./common";
-import { Switch } from "react-aria-components";
-import { useReducer, useState } from "react";
+import {
+  DateInput,
+  DateSegment,
+  Switch,
+  TimeField,
+} from "react-aria-components";
+import { useMemo, useReducer, useState } from "react";
 import { Icon } from "~/app/_fragments/Icon";
+import { getLocalTimeZone, Time, ZonedDateTime } from "@internationalized/date";
+import { TZDate } from "@date-fns/tz";
+import { formatDate, formatISO } from "date-fns";
+import { currentTimezone, formatTimezone } from "~/app/_util/timeZone";
 
 const groupFormSchema = z.object({
-  title: z.string(),
+  title: z.string().min(1),
+  time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/),
+  zone: z.string().min(1),
 });
 type GroupFormData = z.infer<typeof groupFormSchema>;
 export function GroupForm(props: {
@@ -20,11 +31,10 @@ export function GroupForm(props: {
   onCancel?: () => void;
   initialValues: GroupFormData;
 }) {
-  const { form, fields, errorDisplay } = useConform(
-    groupFormSchema,
-    props.onSubmit,
-  );
+  const { form, fields, errorDisplay } = useConform(groupFormSchema, props.onSubmit);
   const allTargets = api.notifications.allTargets.useQuery();
+  const zone = useMemo(currentTimezone, []);
+  const formattedZone = useMemo(() => formatTimezone(zone), [zone]);
 
   return (
     <form {...getFormProps(form)}>
@@ -49,6 +59,29 @@ export function GroupForm(props: {
           defaultValue={props.initialValues.title}
         />
       </Forms.Labelled>
+      <input type="hidden" name="zone" value={zone} />
+      <Forms.Labelled label="Notify me daily" fields={[]}>
+        <TimeField
+          granularity="hour"
+          className="flex flex-row flex-wrap h-auto items-center"
+          name="time"
+          defaultValue={new Time(9)} // 9AM local time
+          aria-label="Notify me daily"
+        >
+          <DateInput className='input input-ghost '>
+            {(segment) => <DateSegment segment={segment} />}
+          </DateInput>
+          <div className="grow-1 shrink-1 text-right mb-3">{formattedZone}</div>
+        </TimeField>
+      </Forms.Labelled>
+      <Forms.ButtonGroup>
+        <Forms.SubmitButton
+          label={props.mode === "add" ? "Create new Group" : "Save Changes"}
+        />
+        <Forms.Button label="Cancel" onClick={props.onCancel} />
+      </Forms.ButtonGroup>
+      <div className="divider"/>
+
       {allTargets.isSuccess &&
         allTargets.data.map(
           (t) =>
@@ -60,12 +93,6 @@ export function GroupForm(props: {
               />
             ),
         )}
-      <Forms.ButtonGroup>
-        <Forms.SubmitButton
-          label={props.mode === "add" ? "Create new Group" : "Save Changes"}
-        />
-        <Forms.Button label="Cancel" onClick={props.onCancel} />
-      </Forms.ButtonGroup>
       {errorDisplay}
     </form>
   );
@@ -120,15 +147,5 @@ function NotificationWidget(props: { groupId: TaskGroupId; target: Target }) {
       </div>
       <span className="ml-4">{props.target.title}</span>
     </div>
-    // <input
-    //   type="checkbox"
-    //   className="toggle"
-    //   checked={
-
-    //   }
-    //   onChange={(e => {
-    //     console.log(e.currentTarget.)
-    //   })}
-    // />
   );
 }

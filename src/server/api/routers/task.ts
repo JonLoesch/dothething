@@ -19,6 +19,8 @@ export const taskRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string().trim().min(1),
+        time: z.string().trim().regex(/^\d{2}:\d{2}:\d{2}$/),
+        zone: z.string().trim().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -27,6 +29,8 @@ export const taskRouter = createTRPCRouter({
           .insert(taskGroups)
           .values({
             title: input.title,
+            time: input.time,
+            zone: input.zone,
             userId: ctx.session.user.id,
             lastNotification: new Date().toDateString(),
           })

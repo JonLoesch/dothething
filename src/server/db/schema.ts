@@ -22,6 +22,8 @@ export const taskGroups = createTable("taskGroups", (d) => ({
   ...UserId(d),
   title: d.varchar({ length: 255 }).notNull(),
   lastNotification: d.date().notNull(),
+  time: d.varchar().notNull(),
+  zone: d.varchar().notNull(),
 }));
 
 export const groupRelations = relations(taskGroups, ({ many }) => ({

@@ -31,15 +31,13 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 ## TODO Next
 - User stories in mobile:
   - On delete group: show # of lined tasks, subscriptions on confirm dialog / cascade
-  - Edit groups
-    - Set/edit notification schedule
-    - (un)associate notification targets
   - Edit Task
     - Mark task as complete
     - Manually adjust next date
   - Subscribe/unsubscribe to push notiications
     - show # of groups on profile subscription page, disable delete if nonzero
 - [DaisyUI Status](https://daisyui.com/components/status/) on tasks
+- Make cron respect time of day (and zone)
 
  
 ## TODO Later
@@ -96,3 +94,4 @@ Modals?
 
 - Migrate production:
 `env "$(sed -n 's/^PRODUCTION_FOR_MIGRATING_MANUALLY_//p' .env)" pnpm db:push`
+`psql "$(sed -n 's/^PRODUCTION_FOR_MIGRATING_MANUALLY_DATABASE_URL=//p' .env)"`
