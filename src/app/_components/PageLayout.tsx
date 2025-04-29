@@ -174,7 +174,7 @@ export function SectionedLayout<
 
   const title = (
     <>
-      <div className="flex flex-row flex-nowrap items-center gap-3 overflow-clip text-nowrap lg:hidden max-sm:[&>*]:nth-last-[n+4]:hidden">
+      <div className="flex flex-row flex-nowrap items-center gap-3 overflow-clip text-nowrap max-sm:[&>*]:nth-last-[n+4]:hidden">
         {selectedLevels.map(({ l, index }) => {
           return (
             <Fragment key={index}>
@@ -190,9 +190,6 @@ export function SectionedLayout<
             </Fragment>
           );
         })}
-      </div>
-      <div className="max-lg:hidden">
-        {selectedLevels.find(() => true)?.l.title}
       </div>
     </>
   );

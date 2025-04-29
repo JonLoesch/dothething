@@ -41,6 +41,7 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
   - Subscribe/unsubscribe to push notiications
     - show # of groups on profile subscription page, disable delete if nonzero
 - [DaisyUI Status](https://daisyui.com/components/status/) on tasks
+- Split up TaskListPage.tsx
 
  
 ## TODO Later

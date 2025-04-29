@@ -2,10 +2,12 @@
 
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogTrigger,
   GridList,
   GridListItem,
+  Group,
   Heading,
   Input,
   Label,
@@ -46,6 +48,13 @@ import { EmptyListDisplay, Explain } from "../_components/utilities";
 import type { UseMutationResult } from "@tanstack/react-query";
 import pluralize from "pluralize";
 import { groupCollapsed } from "console";
+import {
+  differenceInDays,
+  differenceInMonths,
+  differenceInWeeks,
+  differenceInYears,
+  subDays,
+} from "date-fns";
 
 type Group = Awaited<ReturnType<typeof taskRouter.allGroups>>[0];
 type Task = Group["tasks"][0];
@@ -70,9 +79,6 @@ export const TaskListPage: FC = () => {
       void utils.notifications.allTargets.invalidate();
     },
   });
-  const [state, setState] = useState<
-    null | "deleteGroup" | "editGroup" | "addTask" | "editTask" | "deleteTask"
-  >(null);
 
   return (
     <SectionedLayout
@@ -94,16 +100,10 @@ export const TaskListPage: FC = () => {
             ? {
                 ...selectedGroup,
                 selectTask,
-                addTask: () => setState("addTask"),
+                selectedTask,
               }
             : null,
           close: () => selectGroup(null),
-        }),
-        layoutSection({
-          Component: AddTask,
-          title: "New Task",
-          params: state === "addTask" && selectedGroup,
-          close: () => setState(null),
         }),
         layoutSection({
           Component: ViewTask,
@@ -111,33 +111,9 @@ export const TaskListPage: FC = () => {
           params: selectedTask
             ? {
                 ...selectedTask,
-                openEdit: () => setState("editTask"),
-                delete: () => setState("deleteTask"),
               }
             : null,
           close: () => selectTask(null),
-        }),
-        layoutSection({
-          Component: EditTask,
-          title: "Edit",
-          params:
-            state === "editTask" && selectedTask
-              ? {
-                  ...selectedTask,
-                }
-              : null,
-          close: () => setState(null),
-        }),
-        layoutSection({
-          Component: DeleteTask,
-          title: "Edit",
-          params:
-            state === "deleteTask" && selectedTask
-              ? {
-                  ...selectedTask,
-                }
-              : null,
-          close: () => setState(null),
         }),
       ]}
     />
@@ -145,18 +121,25 @@ export const TaskListPage: FC = () => {
 };
 
 interface GroupIdSet extends Set<number> {
-  currentKey: TaskGroupId,
+  currentKey: TaskGroupId;
 }
 
-function gridlistSelectionProps<T extends {id: number}>(items: T[], selected: T | null, select: (id: T['id'] | null) => void) {
+function gridlistSelectionProps<T extends { id: number }>(
+  items: T[],
+  selected: T | null,
+  select: (id: T["id"] | null) => void,
+) {
   return {
     items,
-    selectionMode: 'single',
-    selectionBehavior: 'replace',
+    selectionMode: "single",
     selectedKeys: selected ? [selected.id] : [],
     onSelectionChange(keys) {
       if (keys instanceof Set) {
-        if (keys.size === 1 && 'currentKey' in keys && typeof keys.currentKey === 'number') {
+        if (
+          keys.size === 1 &&
+          "currentKey" in keys &&
+          typeof keys.currentKey === "number"
+        ) {
           select(keys.currentKey);
         }
       }
@@ -173,17 +156,25 @@ const ViewGroups: FC<
 > = (props) => {
   return (
     <div className="flex flex-col">
+      <SectionTitle>Groups:</SectionTitle>
       <GridList
         aria-label="Your existing task groups"
-        {...gridlistSelectionProps(props.groups, props.selectedGroup, props.selectGroup)}
+        {...gridlistSelectionProps(
+          props.groups,
+          props.selectedGroup,
+          props.selectGroup,
+        )}
       >
         {(group) => (
-          <GridListItem textValue={group.title} className='selected:bg-black'>
+          <GridListItem
+            textValue={group.title}
+            className="selected:bg-pink-300"
+          >
             <span className="link link-secondary">{group.title}</span> (
             {group.tasks.length == 0
               ? "empty"
               : pluralize("task", group.tasks.length, true)}
-            ){/* </Button> */}
+            )
           </GridListItem>
         )}
       </GridList>
@@ -196,7 +187,6 @@ const ViewGroups: FC<
         <Button className="btn">Create New Group</Button>
         <Modal isDismissable>
           {(m) => {
-            console.log(m);
             return <AddGroupModal {...m} />;
           }}
         </Modal>
@@ -262,11 +252,17 @@ const AddGroupModal: FC<ModalRenderProps> = (props) => {
         </p>
       </Explain>
       <Forms.Labelled label="Title" fields={[fields.title]}>
-        <Forms.TextField field={fields.title} />
+        <Forms.TextField field={fields.title} autoFocus />
       </Forms.Labelled>
       <Forms.ButtonGroup>
         <Forms.SubmitButton label="Create new Group" />
-        <Forms.Button label="Cancel" onClick={() => props.state.close()} />
+        <Forms.Button
+          label="Cancel"
+          onClick={() => {
+            console.log(props.state, props);
+            return props.state.close();
+          }}
+        />
       </Forms.ButtonGroup>
       {errorDisplay}
     </form>
@@ -307,11 +303,85 @@ const DeleteGroupModal: FC<ModalRenderProps & Group> = (props) => {
 const ViewGroup: FC<
   PropsWithSectionHooks<
     Group & {
-      selectTask: (task: TaskId) => void;
-      addTask: () => void;
+      selectTask: (task: TaskId | null) => void;
+      selectedTask: Task | null;
     }
   >
-> = (group) => {
+> = (props) => {
+  return (
+    <div className="flex flex-col">
+      <SectionTitle>{props.title}</SectionTitle>
+      <GridList
+        aria-label="tasks within this group"
+        {...gridlistSelectionProps(
+          props.tasks,
+          props.selectedTask,
+          props.selectTask,
+        )}
+      >
+        {(task) => {
+          const days = differenceInDays(task.nextDueDate, new Date());
+          const weeks = differenceInWeeks(task.nextDueDate, new Date());
+          const months = differenceInMonths(task.nextDueDate, new Date());
+          const years = differenceInYears(task.nextDueDate, new Date());
+
+          const timespan =
+            Math.abs(years) >= 2
+              ? pluralize("year", Math.abs(years), true)
+              : Math.abs(months) >= 2
+                ? pluralize("month", Math.abs(months), true)
+                : Math.abs(weeks) >= 2
+                  ? pluralize("week", Math.abs(weeks), true)
+                  : pluralize("day", Math.abs(days), true);
+
+          return (
+            <GridListItem textValue={task.title} className="selected:bg-black">
+              <Group className="flex flex-col items-stretch py-2 [&>*]:not-first:ml-6">
+                <span className="link link-secondary">{task.title}</span>
+                {days > 0 ? (
+                  <span>next in {timespan}</span>
+                ) : days === 0 ? (
+                  <span>today</span>
+                ) : (
+                  <span>{timespan} past time</span>
+                )}
+                <span> ({displaySchedule(task.schedule)}) </span>
+              </Group>
+            </GridListItem>
+          );
+        }}
+      </GridList>
+      <EmptyListDisplay items={props.tasks}>
+        You do not have any tasks created yet in this group. Please add a task
+        below to get started.
+      </EmptyListDisplay>
+      <DialogTrigger>
+        <Button className="btn mt-4">Create New Task</Button>
+        <Modal isDismissable>
+          {(m) => {
+            return <AddTaskModal {...m} groupId={props.id} />;
+          }}
+        </Modal>
+      </DialogTrigger>
+      <div className="divider" />
+      <DialogTrigger>
+        <Button className="btn">Edit this group</Button>
+        <Modal isDismissable>
+          {(m) => {
+            return <Stub {...m} />;
+          }}
+        </Modal>
+      </DialogTrigger>
+      <DialogTrigger>
+        <Button className="btn btn-error btn-outline">Delete this group</Button>
+        <Modal isDismissable>
+          {(m) => {
+            return <DeleteGroupModal {...m} {...props} />;
+          }}
+        </Modal>
+      </DialogTrigger>
+    </div>
+  );
   const utils = api.useUtils();
   const remove = api.task.remove.useMutation({
     async onMutate(variables) {
@@ -336,7 +406,7 @@ const ViewGroup: FC<
   });
   return (
     <div className="list gap-4">
-      <div className="self-center font-bold uppercase">{group.title}</div>
+      <div className="self-center font-bold uppercase">{props.title}</div>
       <table className="table">
         <thead className="max-lg:hidden">
           <tr>
@@ -347,12 +417,12 @@ const ViewGroup: FC<
           </tr>
         </thead>
         <tbody>
-          {group.tasks.map((task) => (
+          {props.tasks.map((task) => (
             <Fragment key={task.id}>
               <tr
                 tabIndex={-1}
                 className="lg:pointer-events-none not-focus:[&+*]:hidden max-sm:[&>td]:nth-[n+2]:hidden"
-                onClick={() => group.selectTask(task.id)}
+                onClick={() => props.selectTask(task.id)}
               >
                 <td>{task.title}</td>
                 <td>On {task.nextDueDate}</td>
@@ -380,15 +450,15 @@ const ViewGroup: FC<
         </tbody>
       </table>
       <Forms.ButtonGroup>
-        <button className="btn" onClick={group.addTask}>
+        {/* <button className="btn" onClick={group.addTask}>
           {" "}
           Add new task{" "}
-        </button>
+        </button> */}
 
         <DialogTrigger>
           <Button className="btn btn-error btn-outline">Delete group</Button>
           <Modal isDismissable>
-            {(m) => <DeleteGroupModal {...m} {...group} />}
+            {(m) => <DeleteGroupModal {...m} {...props} />}
           </Modal>
         </DialogTrigger>
       </Forms.ButtonGroup>
@@ -396,46 +466,51 @@ const ViewGroup: FC<
   );
 };
 const ViewTask: FC<
-  PropsWithSectionHooks<Task & { openEdit: () => void; delete: () => void }>
+  PropsWithSectionHooks<Task>
 > = (task) => {
   return (
     <>
       This task should be completed: {displaySchedule(task.schedule)}
       <Forms.ButtonGroup>
-        <button className="btn" onClick={task.openEdit}>
-          Edit
-        </button>
-        <button className="btn" onClick={task.delete}>
-          <Icon.Trash className="h-full" />
-          Delete task
-        </button>
+        <DialogTrigger>
+          <Button className="btn">Edit Task</Button>
+          <Modal isDismissable>
+            {(m) => <EditTaskModal {...m} {...task} />}
+          </Modal>
+        </DialogTrigger>
+        <DialogTrigger>
+          <Button className="btn btn-error btn-outline">Delete task</Button>
+          <Modal isDismissable>
+            {(m) => <DeleteTaskModal {...m} {...task} />}
+          </Modal>
+        </DialogTrigger>
       </Forms.ButtonGroup>
     </>
   );
 };
 
-const EditTask: FC<PropsWithSectionHooks<Task>> = (task) => {
+const EditTaskModal: FC<ModalRenderProps & Task> = (task) => {
   const utils = api.useUtils();
   const edit = api.task.edit.useMutation({
     onSettled: () => void utils.task.allGroups.invalidate(),
-    onSuccess: task.close,
+    onSuccess: () => task.state.close(),
   });
 
   return (
     <TaskForm
       submitLabel="Save Changes"
-      onCancel={task.close}
+      onCancel={() => task.state.close()}
       initialValues={FromDbObject(task)}
       onSubmit={(values) => {
-        void edit
-          .mutateAsync({ ...AsDbObject(values), id: task.id })
-          .then(() => task.close());
+        void edit.mutate({ ...AsDbObject(values), id: task.id });
       }}
     />
   );
 };
 
-const AddTask: FC<PropsWithSectionHooks<Group>> = (group) => {
+const AddTaskModal: FC<ModalRenderProps & { groupId: TaskGroupId }> = (
+  props,
+) => {
   const utils = api.useUtils();
   const add = api.task.add.useMutation({
     async onMutate(variables) {
@@ -475,7 +550,7 @@ const AddTask: FC<PropsWithSectionHooks<Group>> = (group) => {
     onSettled(_data, _error, _variables, _context) {
       void utils.task.allGroups.invalidate();
     },
-    onSuccess: group.close,
+    onSuccess: () => props.state.close(),
   });
 
   return (
@@ -486,32 +561,36 @@ const AddTask: FC<PropsWithSectionHooks<Group>> = (group) => {
         frequencyType: "monthly",
         title: "",
       }}
-      onCancel={group.close}
+      onCancel={() => props.state.close()}
       onSubmit={(values) =>
-        add.mutate({ ...AsDbObject(values), groupId: group.id })
+        add.mutate({ ...AsDbObject(values), groupId: props.groupId })
       }
     />
   );
 };
 
-const DeleteTask: FC<PropsWithSectionHooks<Task>> = (task) => {
+const DeleteTaskModal: FC<ModalRenderProps & Task> = (props) => {
   const utils = api.useUtils();
   const remove = api.task.remove.useMutation({
     onSettled(_data, _error, _variables, _context) {
       void utils.task.allGroups.invalidate();
     },
     onSuccess() {
-      task.close();
+      props.state.close();
     },
   });
   return (
     <Forms.ConfirmDelete
-      {...useConform(z.object({}), () => remove.mutate(task))}
-      close={task.close}
+      {...useConform(z.object({}), () => remove.mutate({id: props.id}))}
+      close={() => props.state.close()}
     >
-      {`Are you sure you want to delete the task "${task.title}"`}
+      {`Are you sure you want to delete the task "${props.title}"`}
     </Forms.ConfirmDelete>
   );
+};
+
+const Stub: FC<ModalRenderProps> = (props) => {
+  return <div>Not implemented yet. :(</div>;
 };
 
 const taskFormSchema = z.object({
@@ -535,6 +614,7 @@ function TaskForm(props: {
     <form {...getFormProps(form)}>
       <Forms.Labelled label="Title" fields={[fields.title]}>
         <Forms.TextField
+          autoFocus
           field={fields.title}
           defaultValue={props.initialValues.title}
         />
@@ -633,3 +713,7 @@ function displaySchedule(schedule: Schedule) {
       return `Every ${schedule.numberOfYears} years`;
   }
 }
+
+const SectionTitle: FC<PropsWithChildren> = (props) => (
+  <div className="mb-8 text-xl">{props.children} </div>
+);

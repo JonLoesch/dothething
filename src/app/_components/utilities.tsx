@@ -1,6 +1,7 @@
 import type { FC, PropsWithChildren } from "react";
 import {
   Button,
+  Checkbox,
   DialogTrigger,
   Disclosure,
   DisclosurePanel,
@@ -8,6 +9,7 @@ import {
   Popover,
   Tooltip,
   TooltipTrigger,
+  type CheckboxProps,
   type DisclosureProps,
 } from "react-aria-components";
 import { Icon } from "./icons";
