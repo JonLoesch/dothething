@@ -1,14 +1,14 @@
 "use client";
 
 import type { FC } from "react";
-import { PageLayout } from "../_components/PageLayout";
 import { titles } from "../_util/titles";
 import { env } from "~/env";
 import { usePushNotifications } from "../_util/pushNotifications";
 import { validators } from "../_util/validators";
 import { pushConfig } from "~/model/pushConfig";
 import { api } from "~/trpc/react";
-import { Icon } from "../_components/icons";
+import { Icon } from "../_fragments/Icon";
+import { PageWithTitle } from "../_layout/PageWithTitle";
 
 export const NotificationSettingsPage: FC = () => {
   const {
@@ -22,7 +22,7 @@ export const NotificationSettingsPage: FC = () => {
   const testCron = api.crons.runTestNotifications.useMutation();
 
   return (
-    <PageLayout title={titles.notificationSettings}>
+    <PageWithTitle title={titles.notificationSettings}>
       <div className="list">
         {allTargets.isSuccess &&
           allTargets.data.map((t) => (
@@ -67,6 +67,6 @@ export const NotificationSettingsPage: FC = () => {
       <button className="btn" onClick={() => testCron.mutate()}>
         Test Crons
       </button>
-    </PageLayout>
+    </PageWithTitle>
   );
 };

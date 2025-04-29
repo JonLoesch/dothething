@@ -7,10 +7,10 @@ import { auth } from "~/server/auth";
 import { type PropsWithChildren } from "react";
 import type { Metadata } from "next";
 import { titles } from "../_util/titles";
-import { ProfilePic } from "../_components/ProfilePic";
-import { Icon } from "../_components/icons";
+import { ProfilePic } from "../_widgets/ProfilePic";
+import { Icon } from "../_fragments/Icon";
 import { Button, Disclosure, DisclosurePanel } from "react-aria-components";
-import { MainLayout } from "../_components/PageLayout";
+import { MainLayout } from "../_layout/MainLayout";
 
 export const metadata: Metadata = {
   title: "DoTheThang",

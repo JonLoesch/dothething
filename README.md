@@ -32,9 +32,7 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - sectioned layout
   - fullscreen width controls
 - User stories in both mobile and fullscreen:
-  - Create tasks / groups
-  - Delete tasks / groups
-    - show # of lined tasks, subscriptions on confirm dialog / cascade
+  - On delete group: show # of lined tasks, subscriptions on confirm dialog / cascade
   - Edit tasks / groups
   - Mark task as complete
   - Set/edit notification schedule

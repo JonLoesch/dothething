@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState, type FC } from "react";
-import { Icon } from "./icons";
+import { Icon } from "../_fragments/Icon";
 
 export const ProfilePic: FC<{ src?: string }> = (props) => {
   const [altVisible, setAltVisible] = useState(props.src === undefined);
