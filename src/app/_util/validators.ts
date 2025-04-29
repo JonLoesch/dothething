@@ -26,3 +26,4 @@ export function idFromColumn<
 
 export type TaskGroupId = z.infer<typeof validators.taskGroupId>;
 export type TaskId = z.infer<typeof validators.taskId>;
+export type TargetId = z.infer<typeof validators.targetId>;

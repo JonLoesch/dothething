@@ -52,7 +52,7 @@ export const NotificationSettingsPage: FC = () => {
             void requestPushNotifications().then(
               (r) =>
                 r &&
-                createPushTarget.mutate(pushConfig.validator.parse(r.toJSON())),
+              createPushTarget.mutate(pushConfig.validator.parse(r.toJSON())),
             );
           }}
         >

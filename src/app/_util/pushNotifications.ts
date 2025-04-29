@@ -46,6 +46,9 @@ export function usePushNotifications() {
       return;
     }
     const existingSubsccription = await getCurrentBrowserSubscriptionStatus;
+    if (existingSubsccription) {
+      return existingSubsccription;
+    }
     if (!existingSubsccription) {
       const registration = await navigator.serviceWorker.register("/sw.js");
       const newSubscription = await registration.pushManager.subscribe({
@@ -55,6 +58,7 @@ export function usePushNotifications() {
       setSubscription(newSubscription);
       return newSubscription;
     }
+    
   }, [getCurrentBrowserSubscriptionStatus]);
   const isSubscribed = useMemo(() => {
     if (subscription === "pending") {

@@ -29,23 +29,24 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
 
 ## TODO Next
-- sectioned layout
-  - fullscreen width controls
-- User stories in both mobile and fullscreen:
+- User stories in mobile:
   - On delete group: show # of lined tasks, subscriptions on confirm dialog / cascade
-  - Edit tasks / groups
-  - Mark task as complete
-  - Set/edit notification schedule
+  - Edit groups
+    - Set/edit notification schedule
+    - (un)associate notification targets
+  - Edit Task
+    - Mark task as complete
+    - Manually adjust next date
   - Subscribe/unsubscribe to push notiications
     - show # of groups on profile subscription page, disable delete if nonzero
 - [DaisyUI Status](https://daisyui.com/components/status/) on tasks
-- Split up TaskListPage.tsx
 
  
 ## TODO Later
+- sectioned layout
+  - fullscreen width controls
 - toDateString shouldn't be littered (centralize in DB adapter)
 - User stories in both mobile and fullscreen:
-  - Manually set next reminder date
   - Suggest a feature
 - User stories in both mobile and fullscreen:
 - Splash / marketing page

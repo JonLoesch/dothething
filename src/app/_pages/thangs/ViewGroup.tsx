@@ -45,7 +45,8 @@ import { ListSection } from "~/app/_fragments/ListSection";
 import { ModalTriggerButton } from "~/app/_fragments/ModalTriggerButton";
 import { AddTaskModal } from "./AddTaskModal";
 import { DeleteGroupModal } from "./DeleteGroupModal";
-import { displaySchedule, type Group, type Task } from "./common";
+import { displaySchedule, type Group, type Target, type Task } from "./common";
+import { EditGroupModal } from "./EditGroupModal";
 
 export const ViewGroup: FC<
   PropsWithSectionHooks<
@@ -98,7 +99,9 @@ export const ViewGroup: FC<
         Create New Task
       </ModalTriggerButton>
       <div className="divider" />
-      <ModalTriggerButton modal={Stub}>Edit this group</ModalTriggerButton>
+      <ModalTriggerButton modal={EditGroupModal} {...props}>
+        Edit this group
+      </ModalTriggerButton>
       <ModalTriggerButton
         className="btn-error btn-outline"
         modal={DeleteGroupModal}
@@ -108,8 +111,4 @@ export const ViewGroup: FC<
       </ModalTriggerButton>
     </ListSection>
   );
-};
-
-const Stub: FC<ModalRenderProps> = (props) => {
-  return <div>Not implemented yet. :(</div>;
 };

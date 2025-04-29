@@ -61,23 +61,11 @@ import { ViewGroup } from "./thangs/ViewGroup";
 import { ViewTask } from "./thangs/ViewTask";
 
 export const TaskListPage: FC = () => {
-  const allTargets = api.notifications.allTargets.useQuery();
   const allGroups = api.task.allGroups.useQuery();
-  const utils = api.useUtils();
   const [selectedGroup, selectGroup] = useSelectId(
     allGroups.isSuccess && allGroups.data,
   );
   const [selectedTask, selectTask] = useSelectId(selectedGroup?.tasks);
-  const subscribe = api.notifications.subscribe.useMutation({
-    onSettled(_data, _error, _variables, _context) {
-      void utils.notifications.allTargets.invalidate();
-    },
-  });
-  const unsubscribe = api.notifications.unsubscribe.useMutation({
-    onSettled(_data, _error, _variables, _context) {
-      void utils.notifications.allTargets.invalidate();
-    },
-  });
 
   return (
     <PageWithSections
