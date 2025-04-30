@@ -50,13 +50,13 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - Splash / marketing page
 - optimistic updates factored out
   - immer might be good for useMutation optimistic updates
+  - is it possible to apply default options as a middleware?
 - Smoother Display of API errors
   - fade in / out
   - dismiss functionality
   - after fade out, should still be able to pull up via corner widget or something
 
 ## TODO cleanup
-- nix headlessUI?
 - Look into zod branding
 - react fragment navigation
 - mailto header on VAPID details
