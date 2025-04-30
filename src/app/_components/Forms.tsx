@@ -40,7 +40,7 @@ export function useConform<T extends z.ZodTypeAny>(
   }, [onSubmit]);
   const stableHandler = useCallback(
     (event: FormEvent, context: { formData: FormData }) => {
-      handlerRef.current?.(schema.parse(Object.fromEntries(context.formData)));
+      handlerRef.current?.(schema.parse(Object.fromEntries(context.formData)) as z.infer<T>);
       event.preventDefault();
     },
     [schema],
