@@ -20,7 +20,7 @@ import { currentTimezone, formatTimezone } from "~/app/_util/timeZone";
 
 const groupFormSchema = z.object({
   title: z.string().min(1),
-  time: z.string().regex(/^\d{2}:\d{2}:\d{2}$/),
+  hour: z.string().regex(/^\d{2}:\d{2}:\d{2}$/).transform(x => parseInt(x.slice(0, 2), 10)),
   zone: z.string().min(1),
 });
 type GroupFormData = z.infer<typeof groupFormSchema>;
@@ -33,8 +33,7 @@ export function GroupForm(props: {
 }) {
   const { form, fields, errorDisplay } = useConform(groupFormSchema, props.onSubmit);
   const allTargets = api.notifications.allTargets.useQuery();
-  const zone = useMemo(currentTimezone, []);
-  const formattedZone = useMemo(() => formatTimezone(zone), [zone]);
+  const formattedZone = useMemo(() => formatTimezone(props.initialValues.zone), [props.initialValues.zone]);
 
   return (
     <form {...getFormProps(form)}>
@@ -59,13 +58,13 @@ export function GroupForm(props: {
           defaultValue={props.initialValues.title}
         />
       </Forms.Labelled>
-      <input type="hidden" name="zone" value={zone} />
-      <Forms.Labelled label="Notify me daily" fields={[]}>
+      <input type="hidden" name="zone" value={props.initialValues.zone} />
+      <Forms.Labelled label="Notify me daily" fields={[fields.hour]}>
         <TimeField
           granularity="hour"
           className="flex flex-row flex-wrap h-auto items-center"
-          name="time"
-          defaultValue={new Time(9)} // 9AM local time
+          name="hour"
+          defaultValue={new Time(props.initialValues.hour)}
           aria-label="Notify me daily"
         >
           <DateInput className='input input-ghost '>

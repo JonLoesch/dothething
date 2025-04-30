@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PageWithTitle } from "../_layout/PageWithSections";
+import { PageWithTitle } from "../_layout/PageWithTitle";
 
 export default async function Home() {
     

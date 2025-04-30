@@ -14,6 +14,7 @@ import { _brand } from "~/app/_util/brandId";
 import type { taskRouter } from "~/server/api/routers/task";
 import { api } from "~/trpc/react";
 import { type AppRouter } from "~/server/api/root";
+import { currentTimezone } from "~/app/_util/timeZone";
 
 let dec = -1;
 
@@ -30,8 +31,8 @@ export function useAddGroup(
         return [
           ...(x ?? []),
           {
+            ...variables,
             id: _brand(dec--),
-            title: variables.title,
             createdAt: new Date(),
             deletedAt: new Date(),
             tasks: [],
@@ -55,6 +56,7 @@ export function useAddGroup(
 export function useAddTask(
   extraOptions: ExposedOptions<InferDef<typeof taskRouter.add>>,
 ) {
+  
   const utils = api.useUtils();
   return useMutationWithExtraOptions(api.task.add, extraOptions, {
     async onMutate(variables) {

@@ -22,7 +22,7 @@ export const taskGroups = createTable("taskGroups", (d) => ({
   ...UserId(d),
   title: d.varchar({ length: 255 }).notNull(),
   lastNotification: d.date().notNull(),
-  time: d.varchar().notNull(),
+  hour: d.integer().notNull(),
   zone: d.varchar().notNull(),
 }));
 

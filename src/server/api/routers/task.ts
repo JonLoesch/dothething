@@ -19,7 +19,7 @@ export const taskRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string().trim().min(1),
-        time: z.string().trim().regex(/^\d{2}:\d{2}:\d{2}$/),
+        hour: z.number().int().min(0).max(23),
         zone: z.string().trim().min(1),
       }),
     )
@@ -29,7 +29,7 @@ export const taskRouter = createTRPCRouter({
           .insert(taskGroups)
           .values({
             title: input.title,
-            time: input.time,
+            hour: input.hour,
             zone: input.zone,
             userId: ctx.session.user.id,
             lastNotification: new Date().toDateString(),
@@ -38,6 +38,28 @@ export const taskRouter = createTRPCRouter({
             id: taskGroups.id,
           })
       )[0]?.id;
+    }),
+  editGroup: protectedProcedure
+    .input(
+      z.object({
+        id: validators.taskGroupId,
+        title: z.string().trim().min(1),
+        hour: z.number().int().min(0).max(23),
+        zone: z.string().trim().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(taskGroups)
+        .set({
+          title: input.title,
+          hour: input.hour,
+          zone: input.zone,
+        })
+        .where(and(
+          eq(taskGroups.userId, ctx.session.user.id),
+          eq(taskGroups.id, input.id),
+        ));
     }),
 
   add: protectedProcedure

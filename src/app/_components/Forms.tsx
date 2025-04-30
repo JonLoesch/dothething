@@ -40,10 +40,10 @@ export function useConform<T extends z.ZodTypeAny>(
   }, [onSubmit]);
   const stableHandler = useCallback(
     (event: FormEvent, context: { formData: FormData }) => {
-      handlerRef.current?.(Object.fromEntries(context.formData));
+      handlerRef.current?.(schema.parse(Object.fromEntries(context.formData)));
       event.preventDefault();
     },
-    [],
+    [schema],
   );
   const [form, fields] = useForm({
     shouldValidate: "onBlur",
@@ -77,9 +77,10 @@ function Labelled(
   const firstError = props.fields
     .flatMap((x) => x.errors)
     .find((x) => typeof x === "string");
+
   return (
     <div>
-      <label className="input validator h-[unset]">
+      <label className="input validator h-[unset]" aria-invalid={typeof firstError === 'string' ? true : undefined}>
         <span className="label">{props.label}:</span>
         {props.children}
       </label>
