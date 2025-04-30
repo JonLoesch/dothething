@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Forms, useConform } from "~/app/_components/Forms";
 import { Explain } from "~/app/_fragments/Explain";
 import type { TargetId, TaskGroupId } from "~/app/_util/validators";
-import { api } from "~/trpc/react";
+import { useTRPC } from "~/trpc/react";
 import type { Target } from "./common";
 import {
   DateInput,
@@ -18,6 +18,10 @@ import { TZDate } from "@date-fns/tz";
 import { formatDate, formatISO } from "date-fns";
 import { currentTimezone, formatTimezone } from "~/app/_util/timeZone";
 
+import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+
 const groupFormSchema = z.object({
   title: z.string().min(1),
   hour: z.string().regex(/^\d{2}:\d{2}:\d{2}$/).transform(x => parseInt(x.slice(0, 2), 10)),
@@ -31,8 +35,9 @@ export function GroupForm(props: {
   onCancel?: () => void;
   initialValues: GroupFormData;
 }) {
+  const api = useTRPC();
   const { form, fields, errorDisplay } = useConform(groupFormSchema, props.onSubmit);
-  const allTargets = api.notifications.allTargets.useQuery();
+  const allTargets = useQuery(api.notifications.allTargets.queryOptions());
   const formattedZone = useMemo(() => formatTimezone(props.initialValues.zone), [props.initialValues.zone]);
 
   return (
@@ -98,17 +103,18 @@ export function GroupForm(props: {
 }
 
 function NotificationWidget(props: { groupId: TaskGroupId; target: Target }) {
-  const utils = api.useUtils();
-  const subscribe = api.notifications.subscribe.useMutation({
+  const api = useTRPC();
+  const queryClient = useQueryClient();
+  const subscribe = useMutation(api.notifications.subscribe.mutationOptions({
     onSettled(_data, _error, _variables, _context) {
-      void utils.notifications.allTargets.invalidate();
+      void queryClient.invalidateQueries(api.notifications.allTargets.pathFilter());
     },
-  });
-  const unsubscribe = api.notifications.unsubscribe.useMutation({
+  }));
+  const unsubscribe = useMutation(api.notifications.unsubscribe.mutationOptions({
     onSettled(_data, _error, _variables, _context) {
-      void utils.notifications.allTargets.invalidate();
+      void queryClient.invalidateQueries(api.notifications.allTargets.pathFilter());
     },
-  });
+  }));
 
   const isSubscribed = !!props.target.subscriptions.find(
     (s) => s.groupId === props.groupId,

@@ -6,11 +6,14 @@ import { env } from "~/env";
 import { usePushNotifications } from "../_util/pushNotifications";
 import { validators } from "../_util/validators";
 import { pushConfig } from "~/model/pushConfig";
-import { api } from "~/trpc/react";
+import { useTRPC } from "~/trpc/react";
 import { Icon } from "../_fragments/Icon";
 import { PageWithTitle } from "../_layout/PageWithTitle";
 
+import { useMutation } from "@tanstack/react-query";
+
 export const NotificationSettingsPage: FC = () => {
+  const api = useTRPC();
   const {
     allTargets,
     createPushTarget,
@@ -19,7 +22,7 @@ export const NotificationSettingsPage: FC = () => {
     removeTarget,
     browserEndpoint,
   } = usePushNotifications();
-  const testCron = api.crons.runTestNotifications.useMutation();
+  const testCron = useMutation(api.crons.runTestNotifications.mutationOptions());
 
   return (
     <PageWithTitle title={titles.notificationSettings}>

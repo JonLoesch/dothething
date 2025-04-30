@@ -12,22 +12,26 @@ import { options } from "prettier-plugin-tailwindcss";
 import { useMemo } from "react";
 import { _brand } from "~/app/_util/brandId";
 import type { taskRouter } from "~/server/api/routers/task";
-import { api } from "~/trpc/react";
+import { useTRPC } from "~/trpc/react";
 import { type AppRouter } from "~/server/api/root";
 import { currentTimezone } from "~/app/_util/timeZone";
+
+import { useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 let dec = -1;
 
 export function useAddGroup(
   extraOptions: ExposedOptions<InferDef<typeof taskRouter.addGroup>>,
 ) {
-  const utils = api.useUtils();
+  const api = useTRPC();
+  const queryClient = useQueryClient();
 
   return useMutationWithExtraOptions(api.task.addGroup, extraOptions, {
     async onMutate(variables) {
-      await utils.task.allGroups.cancel();
-      const prevData = utils.task.allGroups.getData();
-      utils.task.allGroups.setData(undefined, (x) => {
+      await queryClient.cancelQueries(api.task.allGroups.pathFilter());
+      const prevData = queryClient.getQueryData(api.task.allGroups.queryKey());
+      queryClient.setQueryData(api.task.allGroups.queryKey(), (x) => {
         return [
           ...(x ?? []),
           {
@@ -45,10 +49,10 @@ export function useAddGroup(
       return { prevData };
     },
     onError(_error, _variables, context) {
-      utils.task.allGroups.setData(undefined, context?.prevData);
+      queryClient.setQueryData(api.task.allGroups.queryKey(), context?.prevData);
     },
     onSettled(_data, _error, _variables, _context) {
-      void utils.task.allGroups.invalidate();
+      void queryClient.invalidateQueries(api.task.allGroups.pathFilter());
     },
   });
 }
@@ -57,12 +61,12 @@ export function useAddTask(
   extraOptions: ExposedOptions<InferDef<typeof taskRouter.add>>,
 ) {
   
-  const utils = api.useUtils();
+  const queryClient = useQueryClient();
   return useMutationWithExtraOptions(api.task.add, extraOptions, {
     async onMutate(variables) {
-      await utils.task.allGroups.cancel();
-      const prevData = utils.task.allGroups.getData();
-      utils.task.allGroups.setData(undefined, (x) => {
+      await queryClient.cancelQueries(api.task.allGroups.pathFilter());
+      const prevData = queryClient.getQueryData(api.task.allGroups.queryKey());
+      queryClient.setQueryData(api.task.allGroups.queryKey(), (x) => {
         return [
           ...(x ?? []).map(({ tasks, ...group }) => ({
             ...group,
@@ -91,35 +95,36 @@ export function useAddTask(
       return { prevData };
     },
     onError(_error, _variables, context) {
-      utils.task.allGroups.setData(undefined, context?.prevData);
+      queryClient.setQueryData(api.task.allGroups.queryKey(), context?.prevData);
     },
     onSettled(_data, _error, _variables, _context) {
-      void utils.task.allGroups.invalidate();
+      void queryClient.invalidateQueries(api.task.allGroups.pathFilter());
     },
   });
 }
 
 export function useRemoveGroup(extraOptions : ExposedOptions<InferDef<typeof taskRouter.removeGroup>>) {
+  const api = useTRPC();
 
-  const utils = api.useUtils();
-  return api.task.removeGroup.useMutation({
+  const queryClient = useQueryClient();
+  return useMutation(api.task.removeGroup.mutationOptions({
     async onMutate(variables) {
-      await utils.task.allGroups.cancel();
-      const prevData = utils.task.allGroups.getData();
-      utils.task.allGroups.setData(undefined, (x) => {
+      await queryClient.cancelQueries(api.task.allGroups.pathFilter());
+      const prevData = queryClient.getQueryData(api.task.allGroups.queryKey());
+      queryClient.setQueryData(api.task.allGroups.queryKey(), (x) => {
         return (x ?? []).filter((group) => group.id !== variables.id);
       });
       return { prevData };
     },
     onError(_error, _variables, context) {
-      utils.task.allGroups.setData(undefined, context?.prevData);
+      queryClient.setQueryData(api.task.allGroups.queryKey(), context?.prevData);
     },
     // onSettled(_data, _error, _variables, _context) {
     // },
     async onSuccess() {
-      await utils.task.allGroups.invalidate();
+      await queryClient.invalidateQueries(api.task.allGroups.pathFilter());
     },
-  });
+  }));
 }
 
 // There's probably a better way to do this, but this hacky thing works:
@@ -129,7 +134,8 @@ function useMutationWithExtraOptions<Def extends ResolverDef, Context>(
   extraOptions: ExposedOptions<Def>,
   options: Options<Def, Context>,
 ) {
-  return mutation.useMutation(
+  const api = useTRPC();
+  return useMutation(mutation.mutationOptions(
     useMemo(
       () => ({
         ...options,
@@ -140,7 +146,7 @@ function useMutationWithExtraOptions<Def extends ResolverDef, Context>(
       }),
       [options, extraOptions],
     ),
-  );
+  ));
 }
 
 type ResolverDef = {

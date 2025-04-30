@@ -1,22 +1,26 @@
-"use client";
-
+"use client";;
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { env } from "~/env";
-import { api } from "~/trpc/react";
+import { useTRPC } from "~/trpc/react";
+
+import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function usePushNotifications() {
-  const allTargets = api.notifications.allTargets.useQuery();
-  const utils = api.useUtils();
-  const createPushTarget = api.notifications.createPushTarget.useMutation({
+  const api = useTRPC();
+  const allTargets = useQuery(api.notifications.allTargets.queryOptions());
+  const queryClient = useQueryClient();
+  const createPushTarget = useMutation(api.notifications.createPushTarget.mutationOptions({
     async onSettled(_data, _error, _variables, _context) {
-      await utils.notifications.allTargets.invalidate();
+      await queryClient.invalidateQueries(api.notifications.allTargets.pathFilter());
     },
-  });
-  const removeTarget = api.notifications.removeTarget.useMutation({
+  }));
+  const removeTarget = useMutation(api.notifications.removeTarget.mutationOptions({
     async onSettled(_data, _error, _variables, _context) {
-      await utils.notifications.allTargets.invalidate();
+      await queryClient.invalidateQueries(api.notifications.allTargets.pathFilter());
     },
-  });
+  }));
 
   const [subscription, setSubscription] = useState<
     PushSubscription | "pending" | "denied" | null

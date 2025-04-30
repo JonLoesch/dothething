@@ -2,15 +2,20 @@ import type { FC } from "react";
 import type { ModalRenderProps } from "react-aria-components";
 import type { Task } from "./common";
 import { TaskForm, FromDbObject, AsDbObject } from "./TaskForm";
-import { api } from "~/trpc/react";
+import { useTRPC } from "~/trpc/react";
+
+
+import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 export const EditTaskModal: FC<ModalRenderProps & Task> = (task) => {
-  const utils = api.useUtils();
-  const edit = api.task.edit.useMutation({
-    onSettled: () => void utils.task.allGroups.invalidate(),
+  const api = useTRPC();
+  const queryClient = useQueryClient();
+  const edit = useMutation(api.task.edit.mutationOptions({
+    onSettled: () => void queryClient.invalidateQueries(api.task.allGroups.pathFilter()),
     onSuccess: () => task.state.close(),
-  });
+  }));
 
   return (
     <TaskForm

@@ -1,5 +1,4 @@
-"use client";
-
+"use client";;
 import {
   Button,
   Checkbox,
@@ -26,7 +25,7 @@ import {
   type HTMLAttributes,
   type PropsWithChildren,
 } from "react";
-import { api } from "~/trpc/react";
+import { useTRPC } from "~/trpc/react";
 import { type taskGroups, type recurringTasks } from "~/server/db/schema";
 import { type Schedule } from "~/model/schedule";
 import {
@@ -60,8 +59,11 @@ import { ViewAll } from "./thangs/ViewAll";
 import { ViewGroup } from "./thangs/ViewGroup";
 import { ViewTask } from "./thangs/ViewTask";
 
+import { useQuery } from "@tanstack/react-query";
+
 export const TaskListPage: FC = () => {
-  const allGroups = api.task.allGroups.useQuery();
+  const api = useTRPC();
+  const allGroups = useQuery(api.task.allGroups.queryOptions());
   const [selectedGroup, selectGroup] = useSelectId(
     allGroups.isSuccess && allGroups.data,
   );
