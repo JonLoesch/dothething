@@ -1,17 +1,17 @@
 import type { FC } from "react";
 import type { ModalRenderProps } from "react-aria-components";
-import { _brand } from "~/app/_util/brandId";
 import type { TaskGroupId } from "~/app/_util/validators";
-import { api } from "~/trpc/react";
 import { AsDbObject, TaskForm } from "./TaskForm";
-import { useAddTask } from "~/model/optimisticUpdates";
+import { useMutation } from "@tanstack/react-query";
+import { useTRPCOptimisticMutations } from "~/model/optimisticUpdates/index";
 
 export const AddTaskModal: FC<ModalRenderProps & { groupId: TaskGroupId }> = (
   props,
 ) => {
-  const add = useAddTask({
+
+  const add = useMutation(useTRPCOptimisticMutations().task.add({
     onSuccess: () => props.state.close(),
-  });
+  }));
 
   return (
     <TaskForm

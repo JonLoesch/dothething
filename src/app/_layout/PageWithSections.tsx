@@ -8,11 +8,9 @@ import React, {
   type PropsWithChildren,
   type ReactNode,
 } from "react";
-import { api, TRPCReactProvider } from "~/trpc/react";
 import { ErrorDisplay } from "./ErrorDisplay";
 import { cls } from "../_util/cls";
 import { Icon } from "../_fragments/Icon";
-import { HydrateClient } from "~/trpc/server";
 import { Button, Disclosure, DisclosurePanel } from "react-aria-components";
 import Link from "next/link";
 import type { Session } from "next-auth";

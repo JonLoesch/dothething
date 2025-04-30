@@ -1,7 +1,16 @@
 "use client";
 
-import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
-import { httpBatchStreamLink, loggerLink, createTRPCClient } from "@trpc/client";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClientProvider,
+  type QueryClient,
+} from "@tanstack/react-query";
+import {
+  httpBatchStreamLink,
+  loggerLink,
+  createTRPCClient,
+} from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
@@ -22,10 +31,7 @@ const getQueryClient = () => {
   return clientQueryClientSingleton;
 };
 
-export const {
-  TRPCProvider,
-  useTRPC
-} = createTRPCContext<AppRouter>();
+export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>();
 
 /**
  * Inference helper for inputs.
@@ -68,7 +74,9 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-        {props.children}
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          {props.children}
+        </HydrationBoundary>
       </TRPCProvider>
     </QueryClientProvider>
   );

@@ -1,11 +1,12 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import type { DecorateRouterRecord } from "@trpc/server/unstable-core-do-not-import";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { env } from "~/env";
-import { appRouter, createCaller } from "~/server/api/root";
 import { cronRouter } from "~/server/api/routers/cron";
 import { createCallerFactory, createTRPCContext } from "~/server/api/trpc";
 import { db } from "~/server/db";
+import { getQueryClient, trpc } from "~/trpc/server";
 
 const factory = createCallerFactory(cronRouter);
 
@@ -24,6 +25,7 @@ export async function GET(
     headers: req.headers,
     db,
   });
+
   const result = await (caller as Record<string, () => Promise<unknown>>)[
     (await params).cron
   ]!.call(caller);

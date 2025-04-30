@@ -2,7 +2,6 @@ import "~/styles/globals.css";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import Link from "next/link";
-import { HydrateClient } from "~/trpc/server";
 import { auth } from "~/server/auth";
 import { type PropsWithChildren } from "react";
 import type { Metadata } from "next";
@@ -29,9 +28,7 @@ export default async function Layout(props: PropsWithChildren) {
       </head>
       <body className="h-full">
         <TRPCReactProvider>
-          <HydrateClient>
             <MainLayout session={session}>{props.children}</MainLayout>
-          </HydrateClient>
         </TRPCReactProvider>
       </body>
     </html>

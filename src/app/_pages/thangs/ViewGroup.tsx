@@ -25,7 +25,6 @@ import {
   type HTMLAttributes,
   type PropsWithChildren,
 } from "react";
-import { api } from "~/trpc/react";
 import { type taskGroups, type recurringTasks } from "~/server/db/schema";
 import { type Schedule } from "~/model/schedule";
 import type { UseMutationResult } from "@tanstack/react-query";

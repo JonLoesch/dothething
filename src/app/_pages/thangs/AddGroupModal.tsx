@@ -4,14 +4,15 @@ import type { ModalRenderProps } from "react-aria-components";
 import { z } from "zod";
 import { useConform, Forms } from "~/app/_components/Forms";
 import { Explain } from "~/app/_fragments/Explain";
-import { _brand } from "~/app/_util/brandId";
-import { useAddGroup } from "~/model/optimisticUpdates";
-import { api } from "~/trpc/react";
 import { GroupForm } from "./GroupForm";
 import { currentTimezone } from "~/app/_util/timeZone";
+import { useMutation } from "@tanstack/react-query";
+import { useTRPCOptimisticMutations } from "~/model/optimisticUpdates/index";
 
 export const AddGroupModal: FC<ModalRenderProps> = (props) => {
-  const addGroup = useAddGroup({ onSuccess: () => props.state.close() });
+  const addGroup = useMutation(useTRPCOptimisticMutations().task.addGroup({
+    onSuccess: () => props.state.close()
+  }))
   return (
     <GroupForm
       initialValues={{

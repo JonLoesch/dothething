@@ -41,6 +41,7 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 
  
 ## TODO Later
+- fake data libraries for optimistic updates
 - sectioned layout
   - fullscreen width controls
 - toDateString shouldn't be littered (centralize in DB adapter)
