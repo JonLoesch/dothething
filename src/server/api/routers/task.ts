@@ -6,6 +6,11 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { recurringTasks, taskGroups } from "~/server/db/schema";
 
 export const taskRouter = createTRPCRouter({
+
+  testInputQuery: protectedProcedure.input(z.number()).query(() => 5),
+  testInputObjectQuery: protectedProcedure.input(z.object({asdf: z.number()})).query(() => 5),
+  // testSubscription: protectedProcedure.input(z.number()).subscription(() => 5),
+
   allGroups: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.query.taskGroups.findMany({
       where: eq(taskGroups.userId, ctx.session.user.id),

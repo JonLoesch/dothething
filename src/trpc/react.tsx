@@ -22,7 +22,7 @@ import SuperJSON from "superjson";
 
 import { type AppRouter } from "~/server/api/root";
 import { createQueryClient } from "./query-client";
-import { observable } from "@trpc/server/observable";
+import { observable, tap } from "@trpc/server/observable";
 import {
   alterResultLink,
   listenForEventsLink,
@@ -60,20 +60,26 @@ export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
-  const fakeHackyTRPC = createTRPCOptionsProxy({
-    client: createTRPCClient<AppRouter>({ links: [] }),
-    queryClient,
-  });
 
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
       links: [
+        () => ({next, op}) => next(op).pipe(tap({
+          error(err) {
+            console.error(err);
+          },
+        })),
         loggerLink({
           enabled: (op) =>
             process.env.NODE_ENV === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
-        ...optimisticallyAddGroups(queryClient, fakeHackyTRPC),
+        ...optimisticallyAddGroups(queryClient),
+        loggerLink({
+          enabled: (op) =>
+            process.env.NODE_ENV === "development" ||
+            (op.direction === "down" && op.result instanceof Error),
+        }),
         httpBatchStreamLink({
           transformer: SuperJSON,
           url: getBaseUrl() + "/api/trpc",
