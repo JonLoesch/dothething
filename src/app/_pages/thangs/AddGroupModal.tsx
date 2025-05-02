@@ -8,11 +8,14 @@ import { GroupForm } from "./GroupForm";
 import { currentTimezone } from "~/app/_util/timeZone";
 import { useMutation } from "@tanstack/react-query";
 import { useTRPCOptimisticMutations } from "~/model/optimisticUpdates/index";
+import { useTRPC } from "~/trpc/react";
 
 export const AddGroupModal: FC<ModalRenderProps> = (props) => {
-  const addGroup = useMutation(useTRPCOptimisticMutations().task.addGroup({
-    onSuccess: () => props.state.close()
-  }))
+  const addGroup = useMutation(
+    useTRPC().task.addGroup.mutationOptions({
+      onSuccess: () => props.state.close(),
+    }),
+  );
   return (
     <GroupForm
       initialValues={{
@@ -27,3 +30,4 @@ export const AddGroupModal: FC<ModalRenderProps> = (props) => {
     />
   );
 };
+

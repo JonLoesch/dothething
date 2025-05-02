@@ -10,14 +10,25 @@ import {
   httpBatchStreamLink,
   loggerLink,
   createTRPCClient,
+  type TRPCLink,
 } from "@trpc/client";
-import { createTRPCContext } from "@trpc/tanstack-react-query";
+import {
+  createTRPCContext,
+  createTRPCOptionsProxy,
+} from "@trpc/tanstack-react-query";
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
 import SuperJSON from "superjson";
 
 import { type AppRouter } from "~/server/api/root";
 import { createQueryClient } from "./query-client";
+import { observable } from "@trpc/server/observable";
+import {
+  alterResultLink,
+  listenForEventsLink,
+  optimisticallyAddGroups,
+  scopedLink,
+} from "~/model/clientCacheLink";
 
 let clientQueryClientSingleton: QueryClient | undefined = undefined;
 const getQueryClient = () => {
@@ -49,6 +60,10 @@ export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
+  const fakeHackyTRPC = createTRPCOptionsProxy({
+    client: createTRPCClient<AppRouter>({ links: [] }),
+    queryClient,
+  });
 
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
@@ -58,6 +73,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             process.env.NODE_ENV === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
+        ...optimisticallyAddGroups(queryClient, fakeHackyTRPC),
         httpBatchStreamLink({
           transformer: SuperJSON,
           url: getBaseUrl() + "/api/trpc",

@@ -37,7 +37,7 @@ export const taskRouter = createTRPCRouter({
           .returning({
             id: taskGroups.id,
           })
-      )[0]?.id;
+      )[0]!.id;
     }),
   editGroup: protectedProcedure
     .input(
